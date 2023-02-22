@@ -50,10 +50,7 @@ const chartData = {
       borderColor: "rgb(75, 192, 19)",
       tension: 0.1,
       xAxisID: "x", // specify the category for this dataset
-
-
     }
-    
   ],
 };
 
