@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { supabase } from "../utils/initSupabase";
 
 export default function AddMood({ user }) {
   const [moods, setMoods] = useState([]);
@@ -14,12 +13,9 @@ export default function AddMood({ user }) {
   }, []);
 
   const fetchMoods = async () => {
-    let { data: moods, error } = await supabase
-      .from("stats")
-      .select("*")
-      .order("id", true);
-    if (error) console.log("error", error);
-    else setMoods(moods);
+    const response = await fetch("/api/mood");
+    const data = await response.json();
+    setMoods(data);
   };
 
   const handleAddMood = async () => {
@@ -37,21 +33,26 @@ export default function AddMood({ user }) {
       setErrorText("Please rate your mood");
       return;
     }
-    const { data: mood, error } = await supabase
-      .from("stats")
-      .insert({
+    const response = await fetch("/api/mood", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         description,
         rating: clicked,
         user_id: user.id,
-        category: category,
-      })
-      .single();
-    if (error) setErrorText(error.message);
-    else setMoods([...moods, mood]);
+        category,
+      }),
+    });
+    const data = await response.json();
+    if (data?.error) {
+      setErrorText(data.error.message);
+      return;
+    }
     setNewDescriptionText("");
-    setClicked(null);
     setCategoryText("");
-    setErrorText("");
+    setClicked(null);
     setIsAdded(true);
   };
 

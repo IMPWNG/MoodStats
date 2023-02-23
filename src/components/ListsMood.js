@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { supabase } from "../utils/initSupabase";
 
 export default function ListsMood({ mood, onDelete }) {
   const [moods, setMoods] = useState([]);
@@ -8,14 +7,13 @@ export default function ListsMood({ mood, onDelete }) {
     fetchMoods();
   }, []);
 
-  const fetchMoods = async () => {
-    let { data: moods, error } = await supabase
-      .from("stats")
-      .select("*")
-      .order("id", true);
-    if (error) console.log("error", error);
-    else setMoods(moods);
-  };
+
+const fetchMoods = async () => {
+    const response = await fetch("/api/mood");
+    const data = await response.json();
+    setMoods(data);
+    };
+
 
   const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);

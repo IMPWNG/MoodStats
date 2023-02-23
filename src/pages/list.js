@@ -1,4 +1,3 @@
-import { supabase } from "../utils/initSupabase";
 import Link from "next/link";
 import ListsMood from "../components/ListsMood";
 import { useState, useEffect } from "react";
@@ -20,22 +19,30 @@ export default function ListPage() {
   }, [moods]);
 
   const fetchMoods = async () => {
-    let { data: moods, error } = await supabase
-      .from("stats")
-      .select("*")
-      .order("id", true);
-    if (error) console.log("error", error);
-    else setMoods(moods);
+    const response = await fetch("/api/mood");
+    const data = await response.json();
+    setMoods(data);
   };
 
-  const deleteMood = async (id) => {
-    try {
-      await supabase.from("stats").delete().eq("id", id);
-      setMoods(moods.filter((x) => x.id != id));
-    } catch (error) {
-      console.log("error", error);
-    }
-  };
+const deleteMood = async (id) => {
+  try {
+    const response = await fetch("/api/mood", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id,
+      }),
+    });
+    setMoods(moods.filter((mood) => mood.id !== id));
+    response.status === 200 && console.log("Mood deleted successfully");
+  } catch (error) {
+    console.log("Error deleting mood:", error);
+  }
+};
+
+  
   const getMostUsedCategory = (moods) => {
     const categoryCounts = {};
     moods.forEach((mood) => {
