@@ -1,23 +1,21 @@
-import { supabase } from '../lib/initSupabase'
-import { Auth } from '@supabase/ui'
-import AddMood from '../components/AddMood'
-import Link from 'next/link'
+import { supabase } from "../utils/initSupabase";
+import { Auth } from "@supabase/auth-ui-react";
+import AddMood from "../components/AddMood";
+import Link from "next/link";
 
 export default function IndexPage() {
-  const { user } = Auth.useUser()
+  const { user } = Auth.useUser();
 
   return (
-    <div className="w-full h-full bg-gray-300">
+    <>
       {!user ? (
         <div className="w-full h-full flex justify-center items-center p-4">
-          <div>
-            <Auth
-              supabaseClient={supabase}
-              providers={["google", "github"]}
-              socialLayout="horizontal"
-              socialButtonSize="xlarge"
-            />
-          </div>
+          <Auth
+            supabaseClient={supabase}
+            providers={["google", "github"]}
+            socialLayout="horizontal"
+            socialButtonSize="xlarge"
+          />
         </div>
       ) : (
         <div
@@ -28,9 +26,11 @@ export default function IndexPage() {
             Welcome to Mood Stats
           </h1>
           <Link href="/list">
-            <a className="btn-black w-full mt-12">View Stats</a>
+            {" "}
+            <button className="btn-black w-full mt-12">View Mood Stats </button>
           </Link>
-          <AddMood user={supabase.auth.user()} />
+
+          <AddMood user={user} />
           <button
             className="btn-black w-full mt-12"
             onClick={async () => {
@@ -42,6 +42,6 @@ export default function IndexPage() {
           </button>
         </div>
       )}
-    </div>
+    </>
   );
 }

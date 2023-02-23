@@ -1,3 +1,4 @@
+
 import { Line } from "react-chartjs-2";
 import {
   Chart,
@@ -17,7 +18,7 @@ Chart.register(
   Legend
 );
 
-export default function StatsMood({ todos: data }) {
+export default function StatsMood({ moods: data }) {
   const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);
     const year = date.getFullYear();
@@ -30,29 +31,28 @@ export default function StatsMood({ todos: data }) {
     return formattedDateTime;
   };
 
-
-const chartData = {
-  labels: data?.map((item) => formatDateTime(item.inserted_at)),
-  datasets: [
-    {
-      label: "Mood Rating",
-      data: data?.map((item) => item.rating),
-      fill: false,
-      borderColor: "rgb(75, 192, 192)",
-      tension: 0.1,
-      xAxisID: "x", // specify the category for this dataset
-    },
-    // add the task.text field to the dataset
-    {
-      label: "Task",
-      data: data?.map((item) => item.text),
-      fill: false,
-      borderColor: "rgb(75, 192, 19)",
-      tension: 0.1,
-      xAxisID: "x", // specify the category for this dataset
-    }
-  ],
-};
+  const chartData = {
+    labels: data?.map((item) => formatDateTime(item.created_at)),
+    datasets: [
+      {
+        label: "Mood Rating",
+        data: data?.map((item) => item.rating),
+        fill: false,
+        borderColor: "rgb(75, 192, 192)",
+        tension: 0.1,
+        xAxisID: "x", // specify the category for this dataset
+      },
+      // add the mood.text field to the dataset
+      {
+        label: "Mood Description",
+        data: data?.map((item) => item.text),
+        fill: false,
+        borderColor: "rgb(75, 192, 19)",
+        tension: 0.1,
+        xAxisID: "x", // specify the category for this dataset
+      },
+    ],
+  };
 
   const options = {
     scales: {
@@ -93,7 +93,6 @@ const chartData = {
       },
     },
   };
-
 
   return (
     <div className="w-full">
