@@ -1,19 +1,6 @@
 import { useState, useEffect } from "react";
 
 export default function ListsMood({ mood, onDelete }) {
-  const [moods, setMoods] = useState([]);
-
-  useEffect(() => {
-    fetchMoods();
-  }, []);
-
-
-const fetchMoods = async () => {
-    const response = await fetch("/api/mood");
-    const data = await response.json();
-    setMoods(data);
-    };
-
 
   const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);

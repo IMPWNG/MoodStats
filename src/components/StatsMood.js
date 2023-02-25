@@ -18,7 +18,7 @@ Chart.register(
 );
 
 export default function StatsMood({ moods: data }) {
-  const formatDateTime = (dateTimeString) => {
+  const formatDateTime = (dateTimeString, format) => {
     const date = new Date(dateTimeString);
     const year = date.getFullYear();
     const month = ("0" + (date.getMonth() + 1)).slice(-2);
@@ -26,12 +26,22 @@ export default function StatsMood({ moods: data }) {
     const hours = ("0" + date.getHours()).slice(-2);
     const minutes = ("0" + date.getMinutes()).slice(-2);
     const seconds = ("0" + date.getSeconds()).slice(-2);
-    const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    let formattedDateTime;
+    switch (format) {
+      case "date":
+        formattedDateTime = `${year}-${month}-${day}`;
+        break;
+      case "time":
+        formattedDateTime = `${hours}:${minutes}:${seconds}`;
+        break;
+      default:
+        formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        break;
+    }
     return formattedDateTime;
   };
-
   const chartData = {
-    labels: data?.map((item) => formatDateTime(item.created_at)),
+    labels: data?.map((item) => formatDateTime(item.created_at, "date")),
     datasets: [
       {
         label: "Mood Rating",
@@ -50,48 +60,34 @@ export default function StatsMood({ moods: data }) {
         tension: 0.1,
         xAxisID: "x", // specify the category for this dataset
       },
+      {
+        label: "Mood Category",
+        data: data?.map((item) => item.category),
+        fill: false,
+        borderColor: "rgb(75, 192, 424)",
+        tension: 0.1,
+        xAxisID: "x", // specify the category for this dataset
+      },
+      {
+        label: "Mood Date",
+        data: data?.map((item) => formatDateTime(item.created_at, "date")),
+        fill: false,
+        borderColor: "rgb(55, 12, 192)",
+        tension: 0.1,
+        xAxisID: "x", // specify the category for this dataset
+      }
     ],
   };
 
   const options = {
     scales: {
-      y: {
-        type: "linear",
-        ticks: {
-          beginAtZero: true,
-          max: 10,
-        },
-        title: {
-          display: true,
-          text: "Mood Rating",
-          font: {
-            weight: "bold",
-            size: 14,
-          },
-        },
-      },
       x: {
-        time: {
-          displayFormats: {
-            hour: "MMM D, hA",
-          },
-        },
-        title: {
-          display: true,
-          text: "Date",
-          font: {
-            weight: "bold",
-            size: 14,
-          },
-        },
-      },
-    },
-    plugins: {
-      legend: {
-        position: "top",
+        type: "category",
+        labels: data?.map((item) => formatDateTime(item.created_at, "date")),
       },
     },
   };
+  
 
   return (
     <div className="w-full">

@@ -6,7 +6,6 @@ export const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-
 export default async function handler(req, res) {
   const { method } = req;
 
@@ -64,4 +63,10 @@ export default async function handler(req, res) {
       res.setHeader("Allow", ["GET", "POST", "DELETE"]);
       res.status(405).end(`Method ${method} Not Allowed`);
   }
+
+
+
+
+
+
 }

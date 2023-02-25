@@ -2,47 +2,59 @@ import Link from "next/link";
 import ListsMood from "../components/ListsMood";
 import { useState, useEffect } from "react";
 import StatsMood from "../components/StatsMood";
+import { supabase } from "@/utils/initSupabase";
+import ResumeGPT from "@/components/ResumeGPT";
 
 export default function ListPage() {
   const [moods, setMoods] = useState([]);
   const [averageRating, setAverageRating] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState("idle");
+
+  // useEffect(() => {
+  //   if (moods.length) {
+  //     const totalRating = moods.reduce((acc, cur) => acc + cur.rating, 0);
+  //     setAverageRating(totalRating / moods.length);
+  //   }
+  //   fetchMoods();
+  //   //stop fetching
+  //   setLoading(false);
+
+  // }, [moods]);
 
   useEffect(() => {
     fetchMoods();
   }, []);
 
-  useEffect(() => {
-    if (moods.length) {
-      const totalRating = moods.reduce((acc, cur) => acc + cur.rating, 0);
-      setAverageRating(totalRating / moods.length);
-    }
-  }, [moods]);
-
   const fetchMoods = async () => {
     const response = await fetch("/api/mood");
     const data = await response.json();
+
+    //stop fetching
+    setLoading(false);
+    
+    
     setMoods(data);
   };
 
-const deleteMood = async (id) => {
-  try {
-    const response = await fetch("/api/mood", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        id,
-      }),
-    });
-    setMoods(moods.filter((mood) => mood.id !== id));
-    response.status === 200 && console.log("Mood deleted successfully");
-  } catch (error) {
-    console.log("Error deleting mood:", error);
-  }
-};
+  const deleteMood = async (id) => {
+    try {
+      const response = await fetch("/api/mood", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+        }),
+      });
+      setMoods(moods.filter((mood) => mood.id !== id));
+      response.status === 200 && console.log("Mood deleted successfully");
+    } catch (error) {
+      console.log("Error deleting mood:", error);
+    }
+  };
 
-  
   const getMostUsedCategory = (moods) => {
     const categoryCounts = {};
     moods.forEach((mood) => {
@@ -196,6 +208,52 @@ const deleteMood = async (id) => {
     }
   };
 
+const handleClick = async () => {
+  setStatus("loading");
+  setLoading(true);
+  const { data: stats, error: statsError } = await supabase
+    .from("stats")
+    .select("*");
+
+  if (statsError) {
+    setStatus("idle");
+    console.error(statsError);
+    return;
+  }
+
+  const { data: descriptionStats, error: descriptionStatsError } =
+    await supabase.from("description_stats").select("*");
+
+  if (descriptionStatsError) {
+    setStatus("error");
+    console.error(descriptionStatsError);
+    return;
+  }
+
+  const existingIds = descriptionStats.map((ds) => ds.id);
+
+  for (let i = 0; i < stats.length; i++) {
+    const { id, description } = stats[i];
+    if (!existingIds.includes(id)) {
+      const { error: insertError } = await supabase
+        .from("description_stats")
+        .insert({ id, description });
+      if (insertError) {
+        setStatus("error");
+        console.error(insertError);
+        setLoading(false);
+      }
+    }
+    setStatus("saved to the DB!");
+    setLoading(false);
+    setTimeout(() => {
+      setStatus("idle");
+    }
+    , 2000);
+
+  }
+};
+
   return (
     <>
       <div className="flex justify-between items-center p-4">
@@ -203,21 +261,47 @@ const deleteMood = async (id) => {
         <Link href="/">
           {" "}
           <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Back
+            Add mood
           </button>
         </Link>
+        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => handleClick(moods)}>
+          Save descriptions to database
+        </button>
+        <div className="flex flex-col gap-4 p-4 mb-4">
+          <ResumeGPT />
+        </div>
+        {status === "loading" && <p>Loading...</p>}
+        {status === "saved to the DB!" && <p>Saved to the DB!</p>}
+        {status === "error" && <p>Error!</p>}
+        
+
       </div>
-      <div className="flex flex-col gap-4 p-4">
-        {getMostUsedCategory(moods)
-          ? `Most used category: ${getMostUsedCategory(moods)}`
-          : "Loading..."}{" "}
+      <div className="flex flex-col gap-4 p-4 mb-4">
+        {getMostUsedCategory(moods) ? (
+          <>
+            Most used category:
+            <span className="text-green-500">{getMostUsedCategory(moods)}</span>
+          </>
+        ) : (
+          "Loading..."
+        )}{" "}
         <br />
-        {getLessUsedCategory(moods)
-          ? `Less used category: ${getLessUsedCategory(moods)}`
-          : "Loading..."}{" "}
+        {getLessUsedCategory(moods) ? (
+          <>
+            Less used category:
+            <span className="text-red-500">{getLessUsedCategory(moods)}</span>
+          </>
+        ) : (
+          "Loading..."
+        )}{" "}
         <br />
-        {displayBestRatingsByCategory(moods)}
-        {displayLowRatingsByCategory(moods)}
+        <br />
+        <br />
+        Most Rated Category: {displayBestRatingsByCategory(moods)}
+        <br />
+        Less Rated Category: {displayLowRatingsByCategory(moods)}
+        <br />
+        <br />
         {getMostUsedEmoji(moods)
           ? `Your Mood is moslty: ${getMostUsedEmoji(moods)}`
           : "Loading..."}{" "}
