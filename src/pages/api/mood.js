@@ -44,29 +44,41 @@ export default async function handler(req, res) {
         res.status(400).json({ error: error.message });
       }
       break;
-      case "DELETE":
-        try {
-          const { id } = req.body;
-          const { error } = await supabase
-            .from("stats")
-            .delete()
-            .eq("id", id);
-          if (error) {
-            throw new Error(error.message);
-          }
-          res.status(204).end();
-        } catch (error) {
-          res.status(500).json({ error: error.message });
+    case "DELETE":
+      try {
+        const { id } = req.body;
+        const { error } = await supabase.from("stats").delete().eq("id", id);
+        if (error) {
+          throw new Error(error.message);
         }
-        break;
+        res.status(204).end();
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+      break;
+    case "PUT":
+      try {
+        const { id, description, category, rating } = req.body;
+        const { data, error } = await supabase
+
+          .from("stats")
+          .update({
+            description,
+            category,
+            rating,
+          })
+          .eq("id", id)
+          .single();
+        if (error) {
+          throw new Error(error.message);
+        }
+        res.status(200).json(data);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+      break;
     default:
-      res.setHeader("Allow", ["GET", "POST", "DELETE"]);
+      res.setHeader("Allow", ["GET", "POST", "DELETE", "PUT"]);
       res.status(405).end(`Method ${method} Not Allowed`);
   }
-
-
-
-
-
-
 }
