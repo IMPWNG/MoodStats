@@ -82,7 +82,7 @@ export default function IndexPage() {
                 </p>
               </Link>
 
-              <Link href="/next" className={styles.card} passHref>
+              <Link href="/upgrades" className={styles.card} passHref>
                 <h2>
                   Next Step <span>-&gt;</span>
                 </h2>

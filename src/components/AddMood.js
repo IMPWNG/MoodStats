@@ -284,7 +284,9 @@ export default function AddMood({ user }) {
                     sx={{
                       width: "100%",
                       justifyContent: "center",
-
+                      border: 1,
+                      borderColor: "white",
+                      borderRadius: 2,
                       input: { color: "white" },
                       label: { color: "white" },
                     }}
@@ -305,7 +307,9 @@ export default function AddMood({ user }) {
                     sx={{
                       width: "100%",
                       justifyContent: "center",
-
+                      border: 1,
+                      borderColor: "white",
+                      borderRadius: 2,
                       input: { color: "white" },
                       label: { color: "white" },
                     }}
@@ -325,7 +329,11 @@ export default function AddMood({ user }) {
                     <Button
                       className={getButtonClass(1)}
                       onClick={() => handleClickedButton(1)}
-                      sx={{ color: "white", ":hover": { color: "green" } }}
+                      sx={{
+                        color: "white",
+                        ":hover": { color: "green" },
+                        m: 1,
+                      }}
                     >
                       1
                     </Button>
@@ -333,7 +341,11 @@ export default function AddMood({ user }) {
                     <Button
                       className={getButtonClass(2)}
                       onClick={() => handleClickedButton(2)}
-                      sx={{ color: "white", ":hover": { color: "green" } }}
+                      sx={{
+                        color: "white",
+                        ":hover": { color: "green" },
+                        m: 1,
+                      }}
                     >
                       2
                     </Button>
@@ -341,56 +353,88 @@ export default function AddMood({ user }) {
                     <Button
                       className={getButtonClass(3)}
                       onClick={() => handleClickedButton(3)}
-                      sx={{ color: "white", ":hover": { color: "green" } }}
+                      sx={{
+                        color: "white",
+                        ":hover": { color: "green" },
+                        m: 1,
+                      }}
                     >
                       3
                     </Button>
                     <Button
                       className={getButtonClass(4)}
                       onClick={() => handleClickedButton(4)}
-                      sx={{ color: "white", ":hover": { color: "green" } }}
+                      sx={{
+                        color: "white",
+                        ":hover": { color: "green" },
+                        m: 1,
+                      }}
                     >
                       4
                     </Button>
                     <Button
                       className={getButtonClass(5)}
                       onClick={() => handleClickedButton(5)}
-                      sx={{ color: "white", ":hover": { color: "green" } }}
+                      sx={{
+                        color: "white",
+                        ":hover": { color: "green" },
+                        m: 1,
+                      }}
                     >
                       5
                     </Button>
                     <Button
                       className={getButtonClass(6)}
                       onClick={() => handleClickedButton(6)}
-                      sx={{ color: "white", ":hover": { color: "green" } }}
+                      sx={{
+                        color: "white",
+                        ":hover": { color: "green" },
+                        m: 1,
+                      }}
                     >
                       6
                     </Button>
                     <Button
                       className={getButtonClass(7)}
                       onClick={() => handleClickedButton(7)}
-                      sx={{ color: "white", ":hover": { color: "green" } }}
+                      sx={{
+                        color: "white",
+                        ":hover": { color: "green" },
+                        m: 1,
+                      }}
                     >
                       7
                     </Button>
                     <Button
                       className={getButtonClass(8)}
                       onClick={() => handleClickedButton(8)}
-                      sx={{ color: "white", ":hover": { color: "green" } }}
+                      sx={{
+                        color: "white",
+                        ":hover": { color: "green" },
+                        m: 1,
+                      }}
                     >
                       8
                     </Button>
                     <Button
                       className={getButtonClass(9)}
                       onClick={() => handleClickedButton(9)}
-                      sx={{ color: "white", ":hover": { color: "green" } }}
+                      sx={{
+                        color: "white",
+                        ":hover": { color: "green" },
+                        m: 1,
+                      }}
                     >
                       9
                     </Button>
                     <Button
                       className={getButtonClass(10)}
                       onClick={() => handleClickedButton(10)}
-                      sx={{ color: "white", ":hover": { color: "green" } }}
+                      sx={{
+                        color: "white",
+                        ":hover": { color: "green" },
+                        m: 1,
+                      }}
                     >
                       10
                     </Button>

@@ -60,15 +60,13 @@ export default async function handler(req, res) {
       try {
         const { id, description, category, rating } = req.body;
         const { data, error } = await supabase
-
           .from("stats")
           .update({
             description,
             category,
             rating,
           })
-          .eq("id", id)
-          .single();
+          .eq("id", id);
         if (error) {
           throw new Error(error.message);
         }
@@ -77,6 +75,7 @@ export default async function handler(req, res) {
         res.status(500).json({ error: error.message });
       }
       break;
+
     default:
       res.setHeader("Allow", ["GET", "POST", "DELETE", "PUT"]);
       res.status(405).end(`Method ${method} Not Allowed`);

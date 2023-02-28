@@ -1,7 +1,13 @@
 import { set } from "date-fns";
 import React, { useState, useEffect, useRef } from "react";
 import useSWR from "swr";
-import { Grid, Typography, Button, ButtonGroup, TextField } from "@mui/material";
+import {
+  Grid,
+  Typography,
+  Button,
+  ButtonGroup,
+  TextField,
+} from "@mui/material";
 import Paper from "@mui/material/Paper";
 import InputBase from "@mui/material/InputBase";
 import Divider from "@mui/material/Divider";
@@ -14,7 +20,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import CircularProgress from '@mui/material/CircularProgress';
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function ResumeGPT() {
   const messageInput = useRef(null);
@@ -142,60 +148,44 @@ export default function ResumeGPT() {
   // };
 
   return (
-   
-      <Grid
-        item
-        xs={12}
-        md={12}
-        sx={{ justifyContent: "center", textAlign: "center" }}
+    <Grid item xs={12} md={12} sx={{ mt: -2 }}>
+      <ButtonGroup
+        variant="contained"
+        aria-label="contained primary button group"
+        sx={{
+          justifyContent: "center",
+          textAlign: "center",
+          marginTop: "20px",
+          marginBottom: "20px",
+        }}
       >
-        <ButtonGroup
-          variant="contained"
-          aria-label="outlined primary button group"
+        <Button
+          onClick={handleShowResumeDescription}
           sx={{
             justifyContent: "center",
             textAlign: "center",
-            borderRadius: 2,
           }}
         >
-          <Button
-            onClick={handleShowResumeDescription}
-            sx={{
-              justifyContent: "center",
-              textAlign: "center",
-              m: 1,
-              borderRadius: 2,
-            }}
-          >
-            Resume your daily mood
-          </Button>
-          <Button
-            onClick={handleShowResumeDescription}
-            sx={{ m: 1, borderRadius: 2 }}
-          >
-            Resume your weekly mood
-          </Button>
-          <Button
-            onClick={handleShowResumeDescription}
-            sx={{ m: 1, borderRadius: 2 }}
-          >
-            Resume your monthly mood
-          </Button>
-          <Button
-            onClick={handleReset}
-            color="error"
-            sx={{
-              justifyContent: "center",
-              textAlign: "center",
-              m: 1,
-              borderRadius: 2,
-            }}
-          >
-            Clear history
-          </Button>
-        </ButtonGroup>
-      
- 
+          Resume your daily mood
+        </Button>
+        <Button onClick={handleShowResumeDescription}>
+          Resume your weekly mood
+        </Button>
+        <Button onClick={handleShowResumeDescription}>
+          Resume your monthly mood
+        </Button>
+        <Button
+          onClick={handleReset}
+          color="error"
+          sx={{
+            justifyContent: "center",
+            textAlign: "center",
+          }}
+        >
+          Clear history
+        </Button>
+      </ButtonGroup>
+
       {/* <div>
         <dialog
           className="dialog"
@@ -220,63 +210,88 @@ export default function ResumeGPT() {
       </div> */}
 
       <Grid item xs={12} md={12}>
-        {isLoading
-          ? response.map((item, index) => {
-              return (
-                <div
-                  key={index}
-                  className={`${
-                    index % 2 === 0 ? "bg-blue-500" : "bg-gray-500"
-                  } p-3 rounded-lg`}
-                >
-                  <p>{item}</p>
-                </div>
-              );
-            })
-          : response
-          ? response.map((item, index) => {
-              return (
-                <div
-                  key={index}
-                  className={`${
-                    index % 2 === 0 ? "bg-blue-500" : "bg-gray-500"
-                  } p-3 rounded-lg`}
-                >
-                  <p>{item}</p>
-                </div>
-              );
-            })
-          : <div className="bg-gray-500 p-3 rounded-lg">
-              <p>Hi, I'm your personal assistant. How can I help you?</p>
-            </div>}
-            
+        {isLoading ? (
+          response.map((item, index) => {
+            return (
+              <div
+                key={index}
+                className={`${
+                  index % 2 === 0 ? "bg-blue-500" : "bg-gray-500"
+                } p-3 rounded-lg`}
+              >
+                <p>{item}</p>
+              </div>
+            );
+          })
+        ) : response ? (
+          response.map((item, index) => {
+            return (
+              <div
+                key={index}
+                className={`${
+                  index % 2 === 0 ? "bg-blue-500" : "bg-gray-500"
+                } p-3 rounded-lg`}
+              >
+                <p>{item}</p>
+              </div>
+            );
+          })
+        ) : (
+          <div className="bg-gray-500 p-3 rounded-lg">
+            <p>Hi, I'm your personal assistant. How can I help you?</p>
+          </div>
+        )}
       </Grid>
-      <Paper
-        component="form"
-        sx={{ p: "2px 4px", display: "flex", alignItems: "center", width: 500 }}
+      <Grid
+        item
+        xs={12}
+        md={12}
+        sx={{ justifyContent: "center", textAlign: "center", height: 470 }}
       >
-     
-        <InputBase
-          sx={{ ml: 1, flex: 1, width: "100%" }}
-          placeholder="Type your query"
-          inputProps={{ "aria-label": "search .." }}
-          onKeyDown={handleEnter}
+     ...
+      </Grid>
+      <Grid
+        item
+        xs={12}
+        md={12}
+        sx={{
+          justifyContent: "center",
+          textAlign: "center",
+          alignItems: "center",
+        }}
+      >
+        <Paper
+          component="form"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+
+            height: 50,
+            justifyContent: "center",
+            textAlign: "center",
+            borderRadius: 2,
+            position: "relative",
+            bottom: 0,
+          }}
+        >
+          <InputBase
+            sx={{ ml: 1, flex: 1, width: "100%" }}
+            placeholder="Type your query"
+            inputProps={{ "aria-label": "search .." }}
+            onKeyDown={handleEnter}
           />
 
- 
-        <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-        <Button
-          color="primary"
-          sx={{ p: "10px" }}
-          aria-label="directions"
-          onClick={handleSubmit}
-          disabled={isLoading}
-          
-        >
+          <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+          <Button
+            color="primary"
+            sx={{ p: "10px" }}
+            aria-label="directions"
+            onClick={handleSubmit}
+            disabled={isLoading}
+          >
+            {isLoading ? <CircularProgress size={20} /> : "Ask"}  
+          </Button>
 
-          {isLoading ? "Loading..." : "Send"}
-        </Button>
-       
           <FormControl fullWidth sx={{ m: 1, ml: 4, maxWidth: 150 }}>
             <InputLabel id="demo-simple-select-label">Model dIA</InputLabel>
             <Select
@@ -285,7 +300,6 @@ export default function ResumeGPT() {
               label="Model dIA"
               value={currentModel}
               onChange={handleModelChange}
-         
             >
               {models.map((model) => (
                 <MenuItem key={model.id} value={model.id}>
@@ -294,9 +308,8 @@ export default function ResumeGPT() {
               ))}
             </Select>
           </FormControl>
-
-    
-      </Paper>
+        </Paper>
+      </Grid>
     </Grid>
   );
 }
