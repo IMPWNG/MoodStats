@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { createClient } from "@supabase/supabase-js";
 
-export const supabase = createClient(
+export const supabaseClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   switch (method) {
     case "GET":
       try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from("description_stats")
           .select("*")
           .order("id", { ascending: false });

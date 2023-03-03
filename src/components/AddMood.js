@@ -511,7 +511,7 @@ export default function AddMood({ user }) {
           </Button>
           <Button
             className={getButtonClass(5)}
-            onClick={() => handleClickedButton(5)}
+            onClick={() => handleClickedButton(5)}seß
           >
             5
           </Button>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import ListsMood from "../components/ListsMood";
 import { useState, useEffect } from "react";
 import StatsMood from "../components/StatsMood";
-import { supabase } from "@/utils/initSupabase";
+import { supabaseClient } from "@/utils/initSupabase";
 import ResumeGPT from "@/components/ResumeGPT";
 
 export default function ListPage() {
@@ -211,7 +211,7 @@ export default function ListPage() {
 const handleClick = async () => {
   setStatus("loading");
   setLoading(true);
-  const { data: stats, error: statsError } = await supabase
+  const { data: stats, error: statsError } = await supabaseClient
     .from("stats")
     .select("*");
 
@@ -222,7 +222,7 @@ const handleClick = async () => {
   }
 
   const { data: descriptionStats, error: descriptionStatsError } =
-    await supabase.from("description_stats").select("*");
+    await supabaseClient.from("description_stats").select("*");
 
   if (descriptionStatsError) {
     setStatus("error");
@@ -235,7 +235,7 @@ const handleClick = async () => {
   for (let i = 0; i < stats.length; i++) {
     const { id, description } = stats[i];
     if (!existingIds.includes(id)) {
-      const { error: insertError } = await supabase
+      const { error: insertError } = await supabaseClient
         .from("description_stats")
         .insert({ id, description });
       if (insertError) {

@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { createClient } from "@supabase/supabase-js";
 
-export const supabase = createClient(
+export const supabaseClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   switch (method) {
     case "GET":
       try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from("stats")
           .select("*")
           .order("id", { ascending: false });
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     case "POST":
       try {
         const { description, category, rating, user_id } = req.body;
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from("stats")
           .insert({
             description,
@@ -47,7 +47,10 @@ export default async function handler(req, res) {
     case "DELETE":
       try {
         const { id } = req.body;
-        const { error } = await supabase.from("stats").delete().eq("id", id);
+        const { error } = await supabaseClient
+          .from("stats")
+          .delete()
+          .eq("id", id);
         if (error) {
           throw new Error(error.message);
         }
@@ -59,7 +62,7 @@ export default async function handler(req, res) {
     case "PUT":
       try {
         const { id, description, category, rating } = req.body;
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from("stats")
           .update({
             description,

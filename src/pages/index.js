@@ -1,5 +1,5 @@
-import { supabase } from "../utils/initSupabase";
-import { Auth } from "@supabase/auth-ui-react";
+import { supabaseClient } from "../utils/initSupabase";
+import { Auth, ThemeSupa } from "@supabase/auth-ui-react";
 import Head from "next/head";
 import AddMood from "../components/AddMood";
 import Link from "next/link";
@@ -17,10 +17,12 @@ export default function IndexPage() {
       {!user ? (
         <div className="w-full h-full flex justify-center items-center p-4">
           <Auth
-            supabaseClient={supabase}
+            supabaseClient={supabaseClient}
             providers={["google", "github"]}
             socialLayout="horizontal"
             socialButtonSize="xlarge"
+            theme="light"
+            inputClassName="text-white"
           />
         </div>
       ) : (
@@ -41,8 +43,25 @@ export default function IndexPage() {
             <div className={styles.description}>
               <p className="text-2xl font-bold">Moods Stats</p>
               <div>
-                <Button variant="contained" color="primary">
+                <p className="font-bold text-center">
+                  Welcome {user.email} {"  "}
+                  {/* //get user.id  */}
+                  ID: {user.id}
+                </p>
+                <Button variant="contained" color="primary" sx={{ mt: 2 }}>
                   Request a feature or report a bug
+                </Button>
+                <Button
+                  sx={{ mt: 2, ml: 2 }}
+                  Í
+                  variant="contained"
+                  color="secondary"
+                  onClick={async () => {
+                    const { error } = await supabaseClient.auth.signOut();
+                    if (error) console.log("Error logging out:", error.message);
+                  }}
+                >
+                  LogOut
                 </Button>
               </div>
             </div>
@@ -61,8 +80,6 @@ export default function IndexPage() {
                 </p>
               </Link>
               <Link href="/graph_mood" className={styles.card} passHref>
-
-        
                 <h2>
                   Graphs, stats, and more <span>-&gt;</span>
                 </h2>

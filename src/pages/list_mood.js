@@ -2,7 +2,7 @@ import Link from "next/link";
 import ListsMood from "../components/ListsMood";
 import { useState, useEffect } from "react";
 import StatsMood from "../components/StatsMood";
-import { supabase } from "@/utils/initSupabase";
+import { supabaseClient } from "@/utils/initSupabase";
 import ResumeGPT from "@/components/ResumeGPT";
 import {
   Grid,
@@ -11,12 +11,8 @@ import {
   FormGroup,
   FormControlLabel,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
 } from "@mui/material";
+
 
 export default function ListMoodPage() {
   const [moods, setMoods] = useState([]);
@@ -26,6 +22,7 @@ export default function ListMoodPage() {
   const [filterByDate, setFilterByDate] = useState(false);
   const [filterByRate, setFilterByRate] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
+
 
   // useEffect(() => {
   //   if (moods.length) {
@@ -43,6 +40,7 @@ export default function ListMoodPage() {
   }, []);
 
   const fetchMoods = async () => {
+
     const response = await fetch("/api/mood");
     const data = await response.json();
 
