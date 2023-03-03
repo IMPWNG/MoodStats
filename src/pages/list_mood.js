@@ -93,20 +93,30 @@ export default function ListMoodPage({ session }) {
   };
 
   const deleteMood = async (id) => {
-    try {
-      const response = await fetch("/api/mood", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id,
-        }),
-      });
+    // try {
+    //   const response = await fetch("/api/mood", {
+    //     method: "DELETE",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({
+    //       id,
+    //     }),
+    //   });
+    //   setMoods(moods.filter((mood) => mood.id !== id));
+    //   response.status === 200 && console.log("Mood deleted successfully");
+    // } catch (error) {
+    //   console.log("Error deleting mood:", error);
+    // }
+    try { 
+      const { data, error } = await supabase
+        .from("stats")
+        .delete()
+        .match({ id: id });
+      if (error) throw error;
       setMoods(moods.filter((mood) => mood.id !== id));
-      response.status === 200 && console.log("Mood deleted successfully");
     } catch (error) {
-      console.log("Error deleting mood:", error);
+      console.log("error", error.message);
     }
   };
 

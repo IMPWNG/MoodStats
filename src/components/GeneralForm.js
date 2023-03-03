@@ -12,6 +12,7 @@ import {
   StepLabel,
   Card,
   CardContent,
+  CardMedia,
   IconButton,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
@@ -97,29 +98,44 @@ export default function GeneralForm({ session}) {
       setErrorText("Please rate your mood");
       return;
     }
-    const response = await fetch("/api/mood", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        description,
-        rating: clicked,
-        user_id: user.id,
-        category,
-      }),
-    });
-    const data = await response.json();
-    if (data?.error) {
-      setErrorText(data.error.message);
-      return;
+    // const response = await fetch("/api/mood", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     description,
+    //     rating: clicked,
+    //     user_id: user.id,
+    //     category,
+    //   }),
+    // });
+
+    try {
+      const { data, error } = await supabase
+        .from("stats")
+        .insert([
+          {
+            description,
+            rating: clicked,
+            user_id: user.id,
+            category,
+          },
+        ]);
+      if (error) throw error;
+      console.log("data", data);
+          setNewDescriptionText("");
+          setCategoryText("");
+          setClicked(null);
+          setIsAdded(true);
+          setActiveStep(0);
+          fetchMoods();
+
+    } catch (error) {
+      console.log("error", error.message);
     }
-    setNewDescriptionText("");
-    setCategoryText("");
-    setClicked(null);
-    setIsAdded(true);
-    setActiveStep(0);
-    fetchMoods();
+
+
   };
 
   const handleClickedButton = (rating) => {
