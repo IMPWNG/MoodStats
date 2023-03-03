@@ -12,7 +12,6 @@ import {
   StepLabel,
   Card,
   CardContent,
-  CardMedia,
   IconButton,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
