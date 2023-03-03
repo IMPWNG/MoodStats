@@ -9,12 +9,15 @@ import {
   FormControlLabel,
   Button,
 } from "@mui/material";
+import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 
-export default function ListMoodPage() {
+export default function ListMoodPage({ session }) {
   const [moods, setMoods] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterByDate, setFilterByDate] = useState(false);
   const [filterByRate, setFilterByRate] = useState(false);
+    const supabase = useSupabaseClient();
+    const user = useUser();
 
   // useEffect(() => {
   //   if (moods.length) {
@@ -29,17 +32,40 @@ export default function ListMoodPage() {
 
   useEffect(() => {
     fetchMoods();
-  }, []);
+
+  }, [session]);
 
   const fetchMoods = async () => {
-    const response = await fetch("/api/mood");
-    const data = await response.json();
+    try {
+      const { data, error } = await supabase
+        .from("stats")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .eq("user_id", user.id);
 
-    //stop fetching
-    setLoading(false);
-
-    setMoods(data);
+      if (error) throw error;
+      setMoods(data);
+    }
+    catch (error) {
+      console.log("error", error.message);
+    }
   };
+
+
+
+
+
+
+
+  // const fetchMoods = async () => {
+  //   const response = await fetch("/api/mood");
+  //   const data = await response.json();
+
+  //   //stop fetching
+  //   setLoading(false);
+
+  //   setMoods(data);
+  // };
 
   const handleFilterByDate = () => {
     // Toggle the value of filterByDate
