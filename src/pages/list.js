@@ -2,7 +2,7 @@ import Link from "next/link";
 import ListsMood from "../components/ListsMood";
 import { useState, useEffect } from "react";
 import StatsMood from "../components/StatsMood";
-import { supabaseClient } from "@/utils/initSupabase";
+import { supabaseClient } from "@/utils/supabase-server";
 import ResumeGPT from "@/components/ResumeGPT";
 
 export default function ListPage() {

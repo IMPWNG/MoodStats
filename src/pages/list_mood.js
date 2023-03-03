@@ -1,9 +1,6 @@
 import Link from "next/link";
 import ListsMood from "../components/ListsMood";
 import { useState, useEffect } from "react";
-import StatsMood from "../components/StatsMood";
-import { supabaseClient } from "@/utils/initSupabase";
-import ResumeGPT from "@/components/ResumeGPT";
 import {
   Grid,
   Typography,
@@ -13,16 +10,11 @@ import {
   Button,
 } from "@mui/material";
 
-
 export default function ListMoodPage() {
   const [moods, setMoods] = useState([]);
-  const [averageRating, setAverageRating] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState("idle");
   const [filterByDate, setFilterByDate] = useState(false);
   const [filterByRate, setFilterByRate] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
-
 
   // useEffect(() => {
   //   if (moods.length) {
@@ -40,7 +32,6 @@ export default function ListMoodPage() {
   }, []);
 
   const fetchMoods = async () => {
-
     const response = await fetch("/api/mood");
     const data = await response.json();
 
@@ -101,51 +92,50 @@ export default function ListMoodPage() {
     }
   };
 
-// const modifyMood = async (id) => {
-//   try {
-//     const moodToModify = moods.find((mood) => mood.id === id);
-//     const newCategory = prompt("Modify category:", moodToModify.category);
-//     const newDescription = prompt(
-//       "Modify description:",
-//       moodToModify.description
-//     );
-//     const newRating = prompt("Modify rating:", moodToModify.rating);
-//     const newCreatedAt = prompt("Modify created_at:", moodToModify.created_at);
-//     if (
-//       newCategory !== null ||
-//       newDescription !== null ||
-//       newRating !== null ||
-//       newCreatedAt !== null
-//     ) {
-//       const response = await fetch(`/api/mood/${id}`, {
-//         method: "PUT",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify({
-//           category: newCategory || moodToModify.category,
-//           description: newDescription || moodToModify.description,
-//           rating: newRating || moodToModify.rating,
-//           created_at: newCreatedAt || moodToModify.created_at,
-//         }),
-//       });
-//       const modifiedMood = {
-//         ...moodToModify,
-//         category: newCategory || moodToModify.category,
-//         description: newDescription || moodToModify.description,
-//         rating: newRating || moodToModify.rating,
-//         created_at: newCreatedAt || moodToModify.created_at,
-//       };
-//       setMoods((prevMoods) =>
-//         prevMoods.map((mood) => (mood.id === id ? modifiedMood : mood))
-//       );
-//       response.status === 200 && console.log("Mood modified successfully");
-//     }
-//   } catch (error) {
-//     console.log("Error modifying mood:", error);
-//   }
-// };
-
+  // const modifyMood = async (id) => {
+  //   try {
+  //     const moodToModify = moods.find((mood) => mood.id === id);
+  //     const newCategory = prompt("Modify category:", moodToModify.category);
+  //     const newDescription = prompt(
+  //       "Modify description:",
+  //       moodToModify.description
+  //     );
+  //     const newRating = prompt("Modify rating:", moodToModify.rating);
+  //     const newCreatedAt = prompt("Modify created_at:", moodToModify.created_at);
+  //     if (
+  //       newCategory !== null ||
+  //       newDescription !== null ||
+  //       newRating !== null ||
+  //       newCreatedAt !== null
+  //     ) {
+  //       const response = await fetch(`/api/mood/${id}`, {
+  //         method: "PUT",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           category: newCategory || moodToModify.category,
+  //           description: newDescription || moodToModify.description,
+  //           rating: newRating || moodToModify.rating,
+  //           created_at: newCreatedAt || moodToModify.created_at,
+  //         }),
+  //       });
+  //       const modifiedMood = {
+  //         ...moodToModify,
+  //         category: newCategory || moodToModify.category,
+  //         description: newDescription || moodToModify.description,
+  //         rating: newRating || moodToModify.rating,
+  //         created_at: newCreatedAt || moodToModify.created_at,
+  //       };
+  //       setMoods((prevMoods) =>
+  //         prevMoods.map((mood) => (mood.id === id ? modifiedMood : mood))
+  //       );
+  //       response.status === 200 && console.log("Mood modified successfully");
+  //     }
+  //   } catch (error) {
+  //     console.log("Error modifying mood:", error);
+  //   }
+  // };
 
   return (
     <Grid container spacing={3} direction="column" alignItems="center">
