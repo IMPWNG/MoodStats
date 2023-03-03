@@ -1,4 +1,3 @@
-import { useUser } from "@/utils/useUser";
 import styles from "@/styles/Home.module.css";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -19,14 +18,15 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { useTheme } from "@mui/material/styles";
+import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
+
 
 import { Inter } from "@next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
 const steps = ["💬", "📁", "💯"];
 
-export default function GeneralForm() {
-  const { user } = useUser();
+export default function GeneralForm({ session}) {
   const [moods, setMoods] = useState([]);
   const [newDescriptionText, setNewDescriptionText] = useState("");
   const [errorText, setErrorText] = useState("");
@@ -36,16 +36,28 @@ export default function GeneralForm() {
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set());
 
+    const supabase = useSupabaseClient();
+    const user = useUser();
+
   const theme = useTheme();
 
   useEffect(() => {
     fetchMoods();
-  }, []);
+  }, [session]);
 
   const fetchMoods = async () => {
-    const response = await fetch("/api/mood");
-    const data = await response.json();
-    setMoods(data);
+    try {
+      const { data, error } = await supabase
+        .from("stats")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      setMoods(data);
+    } catch (error) {
+      console.log("error", error.message);
+    }
   };
 
   const isStepSkipped = (step) => {

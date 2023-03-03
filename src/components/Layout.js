@@ -10,8 +10,8 @@ export default function Layout({ children, meta: pageMeta }) {
    const supabaseClient = useSupabaseClient();
    const { user } = useUser();
   const meta = {
-    title: "Next.js Subscription Starter",
-    description: "Brought to you by Vercel, Stripe, and Supabase.",
+    title: "Mood Stats",
+    description: "Test",
     cardImage: "/og.png",
     ...pageMeta,
   };
@@ -43,7 +43,7 @@ export default function Layout({ children, meta: pageMeta }) {
           <div className="flex justify-between align-center flex-row py-4 md:py-6 relative">
             <div className="flex flex-1 items-center">
               <nav className="space-x-2 ml-6 hidden lg:block">
-                <p>Layout : Hello {user?.email}!</p>
+                <p>Hello {user?.email}!</p>
               </nav>
             </div>
 

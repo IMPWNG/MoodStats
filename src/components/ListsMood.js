@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import React from "react";
 
-export default function ListsMood({ mood, onDelete, onModify }) {
+export default function ListsMood({ mood, onDelete }) {
 
   const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);
@@ -32,12 +32,6 @@ export default function ListsMood({ mood, onDelete, onModify }) {
         >
           Delete
         </button>
-        {/* <button  className="float-right text-black bg-yellow-400 hover:bg-yellow-500 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900" onClick={(e) => {
-    
-            onModify();
-            }}>
-            Modify
-        </button> */}
         <h2 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
           {mood.rating == 1 && (
             <span className="text-red-500"> {mood.description} 😡</span>
