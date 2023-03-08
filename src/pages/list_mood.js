@@ -1,6 +1,6 @@
 import Link from "next/link";
 import ListsMood from "../components/ListsMood";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import {
   Grid,
   Typography,
@@ -10,12 +10,23 @@ import {
   Button,
 } from "@mui/material";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
+import { set } from "date-fns";
+import { Category } from "@mui/icons-material";
 
 export default function ListMoodPage({ session }) {
   const [moods, setMoods] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filterByDate, setFilterByDate] = useState(false);
   const [filterByRate, setFilterByRate] = useState(false);
+
   const supabase = useSupabaseClient();
   const user = useUser();
 
@@ -31,33 +42,56 @@ export default function ListMoodPage({ session }) {
   // }, [moods]);
 
   useEffect(() => {
+    async function fetchMoods() {
+      try {
+        setLoading(true);
+        const { data: moods, error } = await supabase
+          .from("stats")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .eq("user_id", user.id);
+
+        if (error) throw error;
+        setLoading(false);
+        setMoods(moods);
+      } catch (error) {
+        setError(error.message);
+        setLoading(false);
+        console.log("error", error.message);
+      }
+    }
     fetchMoods();
   }, [session]);
 
-  const fetchMoods = async () => {
+  const deleteMood = async (id) => {
     try {
       const { data, error } = await supabase
         .from("stats")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .eq("user_id", user.id);
-
+        .delete()
+        .match({ id: id });
       if (error) throw error;
-      setMoods(data);
+      setMoods(moods.filter((moods) => moods.id !== id));
     } catch (error) {
       console.log("error", error.message);
     }
   };
 
-  // const fetchMoods = async () => {
-  //   const response = await fetch("/api/mood");
-  //   const data = await response.json();
-
-  //   //stop fetching
-  //   setLoading(false);
-
-  //   setMoods(data);
-  // };
+  const modifyMood = async (id, rating, category, description) => {
+    try {
+      const { data, error } = await supabase
+        .from("stats")
+        .update({
+          rating: rating,
+          category: category,
+          description: description,
+        })
+        .match({ id: id });
+      if (error) throw error;
+      setMoods(moods.filter((moods) => moods.id !== id));
+    } catch (error) {
+      console.log("error", error.message);
+    }
+  };
 
   const handleFilterByDate = () => {
     // Toggle the value of filterByDate
@@ -73,7 +107,11 @@ export default function ListMoodPage({ session }) {
       })
     );
     if (filterByDate) {
-      fetchMoods();
+      setMoods((prevMoods) =>
+        [...prevMoods].sort((a, b) => {
+          return new Date(b.created_at) - new Date(a.created_at);
+        })
+      );
     }
   };
 
@@ -92,76 +130,202 @@ export default function ListMoodPage({ session }) {
     );
   };
 
-  const deleteMood = async (id) => {
-    // try {
-    //   const response = await fetch("/api/mood", {
-    //     method: "DELETE",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({
-    //       id,
-    //     }),
-    //   });
-    //   setMoods(moods.filter((mood) => mood.id !== id));
-    //   response.status === 200 && console.log("Mood deleted successfully");
-    // } catch (error) {
-    //   console.log("Error deleting mood:", error);
-    // }
-    try { 
-      const { data, error } = await supabase
-        .from("stats")
-        .delete()
-        .match({ id: id });
-      if (error) throw error;
-      setMoods(moods.filter((mood) => mood.id !== id));
-    } catch (error) {
-      console.log("error", error.message);
-    }
-  };
+  //   const getMostUsedCategory = (moods) => {
+  //     const categoryCounts = {};
+  //     moods.forEach((moods) => {
+  //       const category = moods.category;
+  //       if (category in categoryCounts) {
+  //         categoryCounts[category] += 1;
+  //       } else {
+  //         categoryCounts[category] = 1;
+  //       }
+  //     });
 
-  // const modifyMood = async (id) => {
-  //   try {
-  //     const moodToModify = moods.find((mood) => mood.id === id);
-  //     const newCategory = prompt("Modify category:", moodToModify.category);
-  //     const newDescription = prompt(
-  //       "Modify description:",
-  //       moodToModify.description
+  //     const sortedCategories = Object.entries(categoryCounts).sort(
+  //       (a, b) => b[1] - a[1]
   //     );
-  //     const newRating = prompt("Modify rating:", moodToModify.rating);
-  //     const newCreatedAt = prompt("Modify created_at:", moodToModify.created_at);
-  //     if (
-  //       newCategory !== null ||
-  //       newDescription !== null ||
-  //       newRating !== null ||
-  //       newCreatedAt !== null
-  //     ) {
-  //       const response = await fetch(`/api/mood/${id}`, {
-  //         method: "PUT",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           category: newCategory || moodToModify.category,
-  //           description: newDescription || moodToModify.description,
-  //           rating: newRating || moodToModify.rating,
-  //           created_at: newCreatedAt || moodToModify.created_at,
-  //         }),
-  //       });
-  //       const modifiedMood = {
-  //         ...moodToModify,
-  //         category: newCategory || moodToModify.category,
-  //         description: newDescription || moodToModify.description,
-  //         rating: newRating || moodToModify.rating,
-  //         created_at: newCreatedAt || moodToModify.created_at,
-  //       };
-  //       setMoods((prevMoods) =>
-  //         prevMoods.map((mood) => (mood.id === id ? modifiedMood : mood))
-  //       );
-  //       response.status === 200 && console.log("Mood modified successfully");
+
+  //     if (sortedCategories.length > 0) {
+  //       return sortedCategories[0][0];
+  //     } else {
+  //       return null;
   //     }
-  //   } catch (error) {
-  //     console.log("Error modifying mood:", error);
+  //   };
+
+  //   const getLessUsedCategory = (moods) => {
+  //     const categoryCounts = {};
+  //     moods.forEach((moods) => {
+  //       const category = moods.category;
+  //       if (category in categoryCounts) {
+  //         categoryCounts[category] += 1;
+  //       } else {
+  //         categoryCounts[category] = 1;
+  //       }
+  //     });
+
+  //     const sortedCategories = Object.entries(categoryCounts).sort(
+  //       (a, b) => a[1] - b[1]
+  //     );
+
+  //     if (sortedCategories.length > 0) {
+  //       return sortedCategories[0][0];
+  //     } else {
+  //       return null;
+  //     }
+  //   };
+
+  //   const displayBestRatingsByCategory = (moods) => {
+  //     const categoryRatings = {};
+
+  //     // loop through each moods
+  //     moods.forEach((moods) => {
+  //       const category = moods.category;
+  //       const rating = moods.rating;
+
+  //       // if category hasn't been seen yet, add it to the object with this rating
+  //       if (!(category in categoryRatings)) {
+  //         categoryRatings[category] = rating;
+  //       } else {
+  //         // if category has been seen, update the rating if this one is better
+  //         if (rating > categoryRatings[category]) {
+  //           categoryRatings[category] = rating;
+  //         }
+  //       }
+  //     });
+
+  //     // filter out categories with ratings less than or equal to 5 and display the best rating for each category
+  //     return (
+  //       <>
+  //         {Object.entries(categoryRatings)
+  //           .filter(([rating]) => rating > 7)
+  //           .map(([category, rating]) => (
+  //             <p key={category}>
+  //               Best rating for category '{category}': {rating}
+  //             </p>
+  //           ))}
+  //       </>
+  //     );
+  //   };
+
+  //   const displayLowRatingsByCategory = (moods) => {
+  //     const categoryRatings = {};
+
+  //     // loop through each moods
+  //     moods.forEach((moods) => {
+  //       const category = moods.category;
+  //       const rating = moods.rating;
+
+  //       // if category hasn't been seen yet, add it to the object with this rating
+  //       if (!(category in categoryRatings)) {
+  //         categoryRatings[category] = rating;
+  //       } else {
+  //         // if category has been seen, update the rating if this one is lower
+  //         if (rating < categoryRatings[category]) {
+  //           categoryRatings[category] = rating;
+  //         }
+  //       }
+  //     });
+
+  //     // loop through the object and display the low rating for each category
+  //     return (
+  //       <>
+  //         {Object.entries(categoryRatings).map(([category, rating]) => {
+  //           if (rating < 3) {
+  //             return (
+  //               <p key={category}>
+  //                 Low rating for category '{category}': {rating}
+  //               </p>
+  //             );
+  //           }
+  //           return null;
+  //         })}
+  //       </>
+  //     );
+  //   };
+
+  //   const getMostUsedEmoji = (moods) => {
+  //     const ratingCounts = {
+  //       1: 0,
+  //       2: 0,
+  //       3: 0,
+  //       4: 0,
+  //       5: 0,
+  //       6: 0,
+  //       7: 0,
+  //       8: 0,
+  //       9: 0,
+  //       10: 0,
+  //     };
+
+  //     moods.forEach((moods) => {
+  //       const rating = moods.rating;
+  //       ratingCounts[rating] += 1;
+  //     });
+
+  //     const sortedRatings = Object.entries(ratingCounts).sort(
+  //       (a, b) => b[1] - a[1]
+  //     );
+
+  //     let mostUsedRating = sortedRatings[0][0];
+
+  //     if (mostUsedRating === "1" || mostUsedRating === "2") {
+  //       return "😡";
+  //     } else if (
+  //       mostUsedRating === "3" ||
+  //       mostUsedRating === "4" ||
+  //       mostUsedRating === "5"
+  //     ) {
+  //       return "😟";
+  //     } else if (mostUsedRating === "6" || mostUsedRating === "7") {
+  //       return "🙂";
+  //     } else {
+  //       return "🥰";
+  //     }
+  //   };
+
+  // const handleClick = async () => {
+  //   setStatus("loading");
+  //   setLoading(true);
+  //   const { data: stats, error: statsError } = await supabaseClient
+  //     .from("stats")
+  //     .select("*");
+
+  //   if (statsError) {
+  //     setStatus("idle");
+  //     console.error(statsError);
+  //     return;
+  //   }
+
+  //   const { data: descriptionStats, error: descriptionStatsError } =
+  //     await supabaseClient.from("description_stats").select("*");
+
+  //   if (descriptionStatsError) {
+  //     setStatus("error");
+  //     console.error(descriptionStatsError);
+  //     return;
+  //   }
+
+  //   const existingIds = descriptionStats.map((ds) => ds.id);
+
+  //   for (let i = 0; i < stats.length; i++) {
+  //     const { id, description } = stats[i];
+  //     if (!existingIds.includes(id)) {
+  //       const { error: insertError } = await supabaseClient
+  //         .from("description_stats")
+  //         .insert({ id, description });
+  //       if (insertError) {
+  //         setStatus("error");
+  //         console.error(insertError);
+  //         setLoading(false);
+  //       }
+  //     }
+  //     setStatus("saved to the DB!");
+  //     setLoading(false);
+  //     setTimeout(() => {
+  //       setStatus("idle");
+  //     }
+  //     , 2000);
+
   //   }
   // };
 
@@ -209,283 +373,27 @@ export default function ListMoodPage({ session }) {
         {filterByDate &&
           moods
             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            .map((mood) => (
+            .map((moods) => (
               <ListsMood
-                key={mood.id}
-                mood={mood}
-                onDelete={() => deleteMood(mood.id)}
-                onModify={() => modifyMood(mood.id)}
+                key={moods.id}
+                moods={moods}
+                onDelete={() => deleteMood(moods.id)}
+                onModify={() => modifyMood(moods.id)}
               />
             ))}
         {!filterByDate &&
-          moods.map((mood) => (
+          moods.map((moods) => (
             <ListsMood
-              key={mood.id}
-              mood={mood}
-              onDelete={() => deleteMood(mood.id)}
-              onModify={() => modifyMood(mood.id)}
+              key={moods.id}
+              moods={moods}
+              onDelete={() => deleteMood(moods.id)}
+              onModify={() => modifyMood(moods.id)}
             />
           ))}
       </Grid>
     </Grid>
   );
 }
-
-// import Link from "next/link";
-// import ListsMood from "../components/ListsMood";
-// import { useState, useEffect } from "react";
-// import StatsMood from "../components/StatsMood";
-// import { supabaseClient } from "@/utils/supabase-server";
-// import ResumeGPT from "@/components/ResumeGPT";
-
-// export default function ListPage() {
-//   const [moods, setMoods] = useState([]);
-//   const [averageRating, setAverageRating] = useState(null);
-//   const [loading, setLoading] = useState(true);
-//   const [status, setStatus] = useState("idle");
-
-//   // useEffect(() => {
-//   //   if (moods.length) {
-//   //     const totalRating = moods.reduce((acc, cur) => acc + cur.rating, 0);
-//   //     setAverageRating(totalRating / moods.length);
-//   //   }
-//   //   fetchMoods();
-//   //   //stop fetching
-//   //   setLoading(false);
-
-//   // }, [moods]);
-
-//   useEffect(() => {
-//     fetchMoods();
-//   }, []);
-
-//   const fetchMoods = async () => {
-//     const response = await fetch("/api/mood");
-//     const data = await response.json();
-
-//     //stop fetching
-//     setLoading(false);
-    
-    
-//     setMoods(data);
-//   };
-
-//   const deleteMood = async (id) => {
-//     try {
-//       const response = await fetch("/api/mood", {
-//         method: "DELETE",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify({
-//           id,
-//         }),
-//       });
-//       setMoods(moods.filter((mood) => mood.id !== id));
-//       response.status === 200 && console.log("Mood deleted successfully");
-//     } catch (error) {
-//       console.log("Error deleting mood:", error);
-//     }
-//   };
-
-//   const getMostUsedCategory = (moods) => {
-//     const categoryCounts = {};
-//     moods.forEach((mood) => {
-//       const category = mood.category;
-//       if (category in categoryCounts) {
-//         categoryCounts[category] += 1;
-//       } else {
-//         categoryCounts[category] = 1;
-//       }
-//     });
-
-//     const sortedCategories = Object.entries(categoryCounts).sort(
-//       (a, b) => b[1] - a[1]
-//     );
-
-//     if (sortedCategories.length > 0) {
-//       return sortedCategories[0][0];
-//     } else {
-//       return null;
-//     }
-//   };
-
-//   const getLessUsedCategory = (moods) => {
-//     const categoryCounts = {};
-//     moods.forEach((mood) => {
-//       const category = mood.category;
-//       if (category in categoryCounts) {
-//         categoryCounts[category] += 1;
-//       } else {
-//         categoryCounts[category] = 1;
-//       }
-//     });
-
-//     const sortedCategories = Object.entries(categoryCounts).sort(
-//       (a, b) => a[1] - b[1]
-//     );
-
-//     if (sortedCategories.length > 0) {
-//       return sortedCategories[0][0];
-//     } else {
-//       return null;
-//     }
-//   };
-
-//   const displayBestRatingsByCategory = (moods) => {
-//     const categoryRatings = {};
-
-//     // loop through each mood
-//     moods.forEach((mood) => {
-//       const category = mood.category;
-//       const rating = mood.rating;
-
-//       // if category hasn't been seen yet, add it to the object with this rating
-//       if (!(category in categoryRatings)) {
-//         categoryRatings[category] = rating;
-//       } else {
-//         // if category has been seen, update the rating if this one is better
-//         if (rating > categoryRatings[category]) {
-//           categoryRatings[category] = rating;
-//         }
-//       }
-//     });
-
-//     // filter out categories with ratings less than or equal to 5 and display the best rating for each category
-//     return (
-//       <>
-//         {Object.entries(categoryRatings)
-//           .filter(([rating]) => rating > 7)
-//           .map(([category, rating]) => (
-//             <p key={category}>
-//               Best rating for category '{category}': {rating}
-//             </p>
-//           ))}
-//       </>
-//     );
-//   };
-
-//   const displayLowRatingsByCategory = (moods) => {
-//     const categoryRatings = {};
-
-//     // loop through each mood
-//     moods.forEach((mood) => {
-//       const category = mood.category;
-//       const rating = mood.rating;
-
-//       // if category hasn't been seen yet, add it to the object with this rating
-//       if (!(category in categoryRatings)) {
-//         categoryRatings[category] = rating;
-//       } else {
-//         // if category has been seen, update the rating if this one is lower
-//         if (rating < categoryRatings[category]) {
-//           categoryRatings[category] = rating;
-//         }
-//       }
-//     });
-
-//     // loop through the object and display the low rating for each category
-//     return (
-//       <>
-//         {Object.entries(categoryRatings).map(([category, rating]) => {
-//           if (rating < 3) {
-//             return (
-//               <p key={category}>
-//                 Low rating for category '{category}': {rating}
-//               </p>
-//             );
-//           }
-//           return null;
-//         })}
-//       </>
-//     );
-//   };
-
-//   const getMostUsedEmoji = (moods) => {
-//     const ratingCounts = {
-//       1: 0,
-//       2: 0,
-//       3: 0,
-//       4: 0,
-//       5: 0,
-//       6: 0,
-//       7: 0,
-//       8: 0,
-//       9: 0,
-//       10: 0,
-//     };
-
-//     moods.forEach((mood) => {
-//       const rating = mood.rating;
-//       ratingCounts[rating] += 1;
-//     });
-
-//     const sortedRatings = Object.entries(ratingCounts).sort(
-//       (a, b) => b[1] - a[1]
-//     );
-
-//     let mostUsedRating = sortedRatings[0][0];
-
-//     if (mostUsedRating === "1" || mostUsedRating === "2") {
-//       return "😡";
-//     } else if (
-//       mostUsedRating === "3" ||
-//       mostUsedRating === "4" ||
-//       mostUsedRating === "5"
-//     ) {
-//       return "😟";
-//     } else if (mostUsedRating === "6" || mostUsedRating === "7") {
-//       return "🙂";
-//     } else {
-//       return "🥰";
-//     }
-//   };
-
-// const handleClick = async () => {
-//   setStatus("loading");
-//   setLoading(true);
-//   const { data: stats, error: statsError } = await supabaseClient
-//     .from("stats")
-//     .select("*");
-
-//   if (statsError) {
-//     setStatus("idle");
-//     console.error(statsError);
-//     return;
-//   }
-
-//   const { data: descriptionStats, error: descriptionStatsError } =
-//     await supabaseClient.from("description_stats").select("*");
-
-//   if (descriptionStatsError) {
-//     setStatus("error");
-//     console.error(descriptionStatsError);
-//     return;
-//   }
-
-//   const existingIds = descriptionStats.map((ds) => ds.id);
-
-//   for (let i = 0; i < stats.length; i++) {
-//     const { id, description } = stats[i];
-//     if (!existingIds.includes(id)) {
-//       const { error: insertError } = await supabaseClient
-//         .from("description_stats")
-//         .insert({ id, description });
-//       if (insertError) {
-//         setStatus("error");
-//         console.error(insertError);
-//         setLoading(false);
-//       }
-//     }
-//     setStatus("saved to the DB!");
-//     setLoading(false);
-//     setTimeout(() => {
-//       setStatus("idle");
-//     }
-//     , 2000);
-
-//   }
-// };
 
 //   return (
 //     <>
@@ -494,7 +402,7 @@ export default function ListMoodPage({ session }) {
 //         <Link href="/">
 //           {" "}
 //           <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-//             Add mood
+//             Add moods
 //           </button>
 //         </Link>
 //         <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => handleClick(moods)}>
@@ -506,7 +414,6 @@ export default function ListMoodPage({ session }) {
 //         {status === "loading" && <p>Loading...</p>}
 //         {status === "saved to the DB!" && <p>Saved to the DB!</p>}
 //         {status === "error" && <p>Error!</p>}
-        
 
 //       </div>
 //       <div className="flex flex-col gap-4 p-4 mb-4">
@@ -546,11 +453,11 @@ export default function ListMoodPage({ session }) {
 //           <StatsMood moods={moods} />
 //         </div>
 //         <div>
-//           {moods.map((mood) => (
+//           {moods.map((moods) => (
 //             <ListsMood
-//               key={mood.id}
-//               mood={mood}
-//               onDelete={() => deleteMood(mood.id)}
+//               key={moods.id}
+//               moods={moods}
+//               onDelete={() => deleteMood(moods.id)}
 //             />
 //           ))}
 //         </div>

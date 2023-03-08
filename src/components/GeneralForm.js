@@ -1,6 +1,6 @@
 import styles from "@/styles/Home.module.css";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Grid,
   TextField,
@@ -12,7 +12,6 @@ import {
   StepLabel,
   Card,
   CardContent,
-  CardMedia,
   IconButton,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
@@ -20,13 +19,12 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { useTheme } from "@mui/material/styles";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 
-
 import { Inter } from "@next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
 const steps = ["💬", "📁", "💯"];
 
-export default function GeneralForm({ session}) {
+export default function GeneralForm() {
   const [moods, setMoods] = useState([]);
   const [newDescriptionText, setNewDescriptionText] = useState("");
   const [errorText, setErrorText] = useState("");
@@ -36,29 +34,10 @@ export default function GeneralForm({ session}) {
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set());
 
-    const supabase = useSupabaseClient();
-    const user = useUser();
+  const supabase = useSupabaseClient();
+  const user = useUser();
 
   const theme = useTheme();
-
-  useEffect(() => {
-    fetchMoods();
-  }, [session]);
-
-  const fetchMoods = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("stats")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .eq("user_id", user.id);
-
-      if (error) throw error;
-      setMoods(data);
-    } catch (error) {
-      console.log("error", error.message);
-    }
-  };
 
   const isStepSkipped = (step) => {
     return skipped.has(step);
@@ -112,30 +91,25 @@ export default function GeneralForm({ session}) {
     // });
 
     try {
-      const { data, error } = await supabase
-        .from("stats")
-        .insert([
-          {
-            description,
-            rating: clicked,
-            user_id: user.id,
-            category,
-          },
-        ]);
+      const { data, error } = await supabase.from("stats").insert([
+        {
+          description,
+          rating: clicked,
+          user_id: user.id,
+          category,
+        },
+      ]);
       if (error) throw error;
       console.log("data", data);
-          setNewDescriptionText("");
-          setCategoryText("");
-          setClicked(null);
-          setIsAdded(true);
-          setActiveStep(0);
-          fetchMoods();
-
+      setNewDescriptionText("");
+      setCategoryText("");
+      setClicked(null);
+      setIsAdded(true);
+      setActiveStep(0);
+      fetchMoods();
     } catch (error) {
       console.log("error", error.message);
     }
-
-
   };
 
   const handleClickedButton = (rating) => {

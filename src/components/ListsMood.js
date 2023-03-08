@@ -1,7 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+} from "@mui/material";
 
-export default function ListsMood({ mood, onDelete }) {
-
+export default function ListsMoods({ moods, onDelete, onModify }) {
   const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);
     const year = date.getFullYear();
@@ -12,6 +19,24 @@ export default function ListsMood({ mood, onDelete }) {
     const seconds = ("0" + date.getSeconds()).slice(-2);
     const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     return formattedDateTime;
+  };
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [rating, setRating] = useState(moods.rating);
+  const [category, setCategory] = useState(moods.category);
+  const [description, setDescription] = useState(moods.description);
+
+  const handleOpenDialog = () => {
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await onModify(moods.id, rating, category, description);
+    handleCloseDialog();
   };
 
   return (
@@ -32,47 +57,99 @@ export default function ListsMood({ mood, onDelete }) {
         >
           Delete
         </button>
+        <button
+          className="float-right text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleOpenDialog();
+          }}
+        >
+          Modify
+        </button>
+        <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+          <DialogTitle>Modify Mood</DialogTitle>
+          <DialogContent>
+            <form onSubmit={handleSubmit}>
+              <TextField
+                autoFocus
+                margin="dense"
+                id="rating"
+                label="Rating"
+                type="number"
+                fullWidth
+                value={rating}
+                onChange={(e) => setRating(e.target.value)}
+              />
+              <TextField
+                autoFocus
+                margin="dense"
+                id="category"
+                label="Category"
+                type="text"
+                fullWidth
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              />
+              <TextField
+                autoFocus
+                margin="dense"
+                id="description"
+                label="Description"
+                type="text"
+                fullWidth
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </form>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog}>Cancel</Button>
+            <Button onClick={handleSubmit}>Submit</Button>
+          </DialogActions>
+        </Dialog>
+
         <h2 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-          {mood.rating == 1 && (
-            <span className="text-red-500"> {mood.description} 😡</span>
+          {moods.rating == 1 && (
+            <span className="text-red-500"> {moods.description} 😡</span>
           )}
-          {mood.rating == 2 && (
-            <span className="text-red-500"> {mood.description} 😡</span>
+          {moods.rating == 2 && (
+            <span className="text-red-500"> {moods.description} 😡</span>
           )}
-          {mood.rating == 3 && (
-            <span className="text-red-500"> {mood.description} 😟</span>
+          {moods.rating == 3 && (
+            <span className="text-red-500"> {moods.description} 😟</span>
           )}
-          {mood.rating == 4 && (
-            <span className="text-orange-500"> {mood.description} 😐</span>
+          {moods.rating == 4 && (
+            <span className="text-orange-500"> {moods.description} 😐</span>
           )}
-          {mood.rating == 5 && (
-            <span className="text-orange-500"> {mood.description} 😐</span>
+          {moods.rating == 5 && (
+            <span className="text-orange-500"> {moods.description} 😐</span>
           )}
-          {mood.rating == 6 && (
-            <span className="text-yellow-500"> {mood.description} 🙂</span>
+          {moods.rating == 6 && (
+            <span className="text-yellow-500"> {moods.description} 🙂</span>
           )}
-          {mood.rating == 7 && (
-            <span className="text-yellow-500"> {mood.description} 😃</span>
+          {moods.rating == 7 && (
+            <span className="text-yellow-500"> {moods.description} 😃</span>
           )}
-          {mood.rating == 8 && (
-            <span className="text-green-500"> {mood.description} 🥰</span>
+          {moods.rating == 8 && (
+            <span className="text-green-500"> {moods.description} 🥰</span>
           )}
-          {mood.rating == 9 && (
-            <span className="text-green-500"> {mood.description} 🥰</span>
+          {moods.rating == 9 && (
+            <span className="text-green-500"> {moods.description} 🥰</span>
           )}
-          {mood.rating == 10 && (
-            <span className="text-green-500"> {mood.description} 🥰</span>
+          {moods.rating == 10 && (
+            <span className="text-green-500"> {moods.description} 🥰</span>
           )}
         </h2>
         <span className="mr-2 text-black dark:text-gray-400">
-          Rating: {mood.rating}/10
+          Rating: {moods.rating}/10
         </span>
         <span className="mr-2 text-black dark:text-gray-400">
-          Created: {formatDateTime(mood.created_at)}
+          Created: {formatDateTime(moods.created_at)}
         </span>
         <br />
         <span className="mr-2 text-black dark:text-gray-400">
-          Category: {mood.category}
+          Category: {moods.category}
         </span>
       </div>
     </li>

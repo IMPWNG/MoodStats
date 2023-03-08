@@ -1,10 +1,29 @@
 import React from "react";
 import GeneralForm from "@/components/GeneralForm";
-import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSession } from "@supabase/auth-helpers-react";
+import { useEffect } from "react";
 
 export default function IndexPage() {
   const session = useSession();
-  const supabaseClient = useSupabaseClient();
+
+    useEffect(() => {
+      fetchMoods();
+    }, [session]);
+
+    const fetchMoods = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("stats")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .eq("user_id", user.id);
+
+        if (error) throw error;
+        setMoods(data);
+      } catch (error) {
+        console.log("error", error.message);
+      }
+    };
 
   return (
     <>
@@ -15,7 +34,7 @@ export default function IndexPage() {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center min-h-screen py-2 -mt-24 text-center">
-          <GeneralForm />
+          <GeneralForm moods={session} />
         </div>
       )}
     </>
