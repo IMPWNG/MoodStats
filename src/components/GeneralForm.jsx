@@ -13,6 +13,10 @@ import {
   Card,
   CardContent,
   IconButton,
+  Stack,
+  AlertTitle,
+  Alert,
+  Snackbar,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -20,6 +24,7 @@ import { useTheme } from "@mui/material/styles";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 
 import { Inter } from "@next/font/google";
+import { ST } from "next/dist/shared/lib/utils";
 
 const inter = Inter({ subsets: ["latin"] });
 const steps = ["💬", "📁", "💯"];
@@ -27,12 +32,14 @@ const steps = ["💬", "📁", "💯"];
 export default function GeneralForm() {
   const [moods, setMoods] = useState([]);
   const [newDescriptionText, setNewDescriptionText] = useState("");
-  const [errorText, setErrorText] = useState("");
   const [clicked, setClicked] = useState(null);
   const [categoryText, setCategoryText] = useState("");
   const [isAdded, setIsAdded] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set());
+  const [alert, setAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState("error");
 
   const supabase = useSupabaseClient();
   const user = useUser();
@@ -62,36 +69,30 @@ export default function GeneralForm() {
     setActiveStep(0);
   };
 
+  const showAlert = (message, severity) => {
+    setAlertMessage(message);
+    setAlertSeverity(severity);
+    setAlert(true);
+  };
+
   const handleAddMood = async () => {
     const description = newDescriptionText.trim();
     const category = categoryText.trim();
     if (description.length === 0) {
-      setErrorText("Description cannot be empty");
+      showAlert("Description cannot be empty", "error");
       return;
     }
     if (category.length === 0) {
-      setErrorText("Category cannot be empty");
+      showAlert("Category cannot be empty", "error");
       return;
     }
     if (!clicked || clicked < 1 || clicked > 10) {
-      setErrorText("Please rate your mood");
+      showAlert("Please select a rating", "error");
       return;
     }
-    // const response = await fetch("/api/mood", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     description,
-    //     rating: clicked,
-    //     user_id: user.id,
-    //     category,
-    //   }),
-    // });
 
     try {
-      const { data, error } = await supabase.from("stats").insert([
+      const { data: moods, error } = await supabase.from("stats").insert([
         {
           description,
           rating: clicked,
@@ -100,15 +101,15 @@ export default function GeneralForm() {
         },
       ]);
       if (error) throw error;
-      console.log("data", data);
       setNewDescriptionText("");
       setCategoryText("");
       setClicked(null);
       setIsAdded(true);
-      setActiveStep(0);
-      fetchMoods();
+      showAlert("Mood added successfully", "success");
     } catch (error) {
       console.log("error", error.message);
+
+      showAlert(error.message, "error");
     }
   };
 
@@ -122,21 +123,6 @@ export default function GeneralForm() {
     } else {
       return "btn-black";
     }
-  };
-
-  //create a function that will show an alet when the user adds a mood
-  const showAddedAlert = () => {
-    if (isAdded) {
-      return (
-        <div className="bg-green-500 text-white p-2 rounded">
-          <p>Added!</p>
-        </div>
-      );
-    }
-    //set a timeout to remove the alert after 3 seconds
-    setTimeout(() => {
-      setIsAdded(false);
-    }, 3000);
   };
 
   const getMostUsedEmoji = (moods) => {
@@ -199,17 +185,8 @@ export default function GeneralForm() {
           </Stepper>
           {activeStep === steps.length ? (
             <>
-              {showAddedAlert()}
-
-              {!!errorText ? (
-                <Grid item xs={12} sx={{ mt: 4, mb: 4 }}>
-                  <Alert text={errorText} />
-                </Grid>
-              ) : (
+              {isAdded ? (
                 <>
-                  <Typography sx={{ mt: 2, mb: 1 }}>
-                    All steps completed - you can submit your mood!
-                  </Typography>
                   <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
                     <Card sx={{ display: "flex", width: "100%" }}>
                       <Box sx={{ display: "flex", flexDirection: "column" }}>
@@ -233,49 +210,63 @@ export default function GeneralForm() {
                             {" " + clicked + " " + getMostUsedEmoji(moods)}
                           </Typography>
                         </CardContent>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            pl: 1,
-                            pb: 1,
-                          }}
-                        >
-                          <IconButton aria-label="previous">
-                            {theme.direction === "rtl" ? (
-                              <EditIcon />
-                            ) : (
-                              <DeleteForeverIcon />
-                            )}
-                          </IconButton>
-
-                          <IconButton aria-label="next">
-                            {theme.direction === "rtl" ? (
-                              <DeleteForeverIcon />
-                            ) : (
-                              <EditIcon />
-                            )}
-                          </IconButton>
-                        </Box>
                       </Box>
                     </Card>
                   </Box>
+                  <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+                    <Button
+                      onClick={handleAddMood}
+                      sx={{ ml: 1, justifyContent: "center", width: "100%" }}
+                      variant="contained"
+                    >
+                      Submit
+                    </Button>
+       
+                  </Box>
+                  <Snackbar open={alert} autoHideDuration={6000}>
+                    <Alert severity={alertSeverity}>{alertMessage}</Alert>
+                  </Snackbar>
+                  
+                </>
+              ) : (
+                <>
+                  <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+                    <Card sx={{ display: "flex", width: "100%" }}>
+                      <Box sx={{ display: "flex", flexDirection: "column" }}>
+                        <CardContent sx={{ flex: "1 0 auto" }}>
+                          <Typography component="div" variant="h5">
+                            {categoryText}
+                          </Typography>
+                          <Typography
+                            variant="subtitle1"
+                            color="text.secondary"
+                            component="div"
+                          >
+                            {newDescriptionText}
+                          </Typography>
+                          <Typography
+                            variant="subtitle1"
+                            color="text.secondary"
+                            component="div"
+                          >
+                            Rate:{" "}
+                            {" " + clicked + " " + getMostUsedEmoji(moods)}
+                          </Typography>
+                        </CardContent>
+                      </Box>
+                    </Card>
+                  </Box>
+                  <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+                    <Button
+                      onClick={handleAddMood}
+                      sx={{ ml: 1, justifyContent: "center", width: "100%" }}
+                      variant="contained"
+                    >
+                      Submit
+                    </Button>
+                  </Box>
                 </>
               )}
-
-              <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-                <Box sx={{ flex: "1 1 auto" }} />
-
-                <Button onClick={handleReset} sx={{ ml: 1 }}>
-                  Reset
-                </Button>
-                <Button onClick={handleBack} sx={{ ml: 1 }}>
-                  Back
-                </Button>
-                <Button onClick={handleAddMood} disabled={!!errorText}>
-                  Submit
-                </Button>
-              </Box>
             </>
           ) : (
             <Grid container spacing={2}>
@@ -452,7 +443,6 @@ export default function GeneralForm() {
                   </Grid>
                 )}
               </Grid>
-
               <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
                 <Button
                   color="inherit"
@@ -467,6 +457,16 @@ export default function GeneralForm() {
                 <Button onClick={handleNext}>
                   {activeStep === steps.length - 1 ? "See resume" : "Next"}
                 </Button>
+
+                {activeStep === steps.length - 1 && (
+                  <Button
+                    onClick={handleAddMood}
+                    sx={{ ml: 1 }}
+                    variant="contained"
+                  >
+                    Submit
+                  </Button>
+                )}
               </Box>
             </Grid>
           )}
@@ -510,8 +510,3 @@ export default function GeneralForm() {
     </main>
   );
 }
-const Alert = ({ text }) => (
-  <div className="rounded-md bg-red-100 p-4 my-3">
-    <div className="text-sm leading-5 text-red-700">{text}</div>
-  </div>
-);
