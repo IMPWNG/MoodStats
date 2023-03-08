@@ -17,7 +17,7 @@ const MyUserContextProvider = (props) => {
   const [isLoadingData, setIsloadingData] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
 
-  const getUserDetails = () => supabase.from("stats").select("*").eq("id", user.id).single();
+  const getUserDetails = async () => await supabase.from("stats").select("*").eq("user_id", user.id);
 
   useEffect(() => {
     if (user && !isLoadingData && !userDetails) {

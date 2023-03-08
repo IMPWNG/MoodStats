@@ -1,29 +1,36 @@
 import React from "react";
 import GeneralForm from "@/components/GeneralForm";
-import { useSession } from "@supabase/auth-helpers-react";
-import { useEffect } from "react";
+import {
+  useSession,
+  useSupabaseClient,
+  useUser,
+} from "@supabase/auth-helpers-react";
+import { useEffect, useState } from "react";
 
 export default function IndexPage() {
   const session = useSession();
+  const user = useUser();
+  const supabase = useSupabaseClient();
+  const [moods, setMoods] = useState([]);
 
-    useEffect(() => {
-      fetchMoods();
-    }, [session]);
+  useEffect(() => {
+    fetchMoods();
+  }, [session]);
 
-    const fetchMoods = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("stats")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .eq("user_id", user.id);
+  const fetchMoods = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("stats")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .eq("user_id", user.id);
 
-        if (error) throw error;
-        setMoods(data);
-      } catch (error) {
-        console.log("error", error.message);
-      }
-    };
+      if (error) throw error;
+      setMoods(data);
+    } catch (error) {
+      console.log("error", error.message);
+    }
+  };
 
   return (
     <>

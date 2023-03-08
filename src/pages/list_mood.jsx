@@ -1,6 +1,6 @@
 import Link from "next/link";
 import ListsMood from "../components/ListsMood";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import {
   Grid,
   Typography,
@@ -20,7 +20,7 @@ import {
 import { set } from "date-fns";
 import { Category } from "@mui/icons-material";
 
-export default function ListMoodPage({ session }) {
+export default function ListMoodPage({ session}) {
   const [moods, setMoods] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -49,7 +49,7 @@ export default function ListMoodPage({ session }) {
           .from("stats")
           .select("*")
           .order("created_at", { ascending: false })
-          .eq("user_id", user.id);
+          .eq("user_id", user?.id || "");
 
         if (error) throw error;
         setLoading(false);
@@ -60,8 +60,10 @@ export default function ListMoodPage({ session }) {
         console.log("error", error.message);
       }
     }
-    fetchMoods();
-  }, [session]);
+    if (user) {
+      fetchMoods();
+    }
+  }, [user]);
 
   const deleteMood = async (id) => {
     try {
