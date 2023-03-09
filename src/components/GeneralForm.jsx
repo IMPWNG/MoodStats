@@ -1,6 +1,6 @@
 import styles from "@/styles/Home.module.css";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Grid,
   TextField,
@@ -31,15 +31,37 @@ export default function GeneralForm() {
   const [clicked, setClicked] = useState(null);
   const [categoryText, setCategoryText] = useState("");
   const [isAdded, setIsAdded] = useState(false);
-
   const [activeStep, setActiveStep] = useState(0);
-
   const [alert, setAlert] = useState(false);
+  const [createCategory, setCreateCategory] = useState([]);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const getCategories = async () => {
+      const { data, error } = await supabase
+        .from("stats")
+        .select("category")
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      const categories = data.map((item) => item.category);
+      const uniqueCategories = [...new Set(categories)];
+      setCreateCategory(uniqueCategories);
+    };
+    getCategories();
+  }, []);
+
+  const displayCategories = createCategory.map((category) => {
+    return (
+      <option key={category} value={category}>
+        {category}
+      </option>
+    );
+  });
+
 
   const supabase = useSupabaseClient();
   const user = useUser();
-
-  const theme = useTheme();
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -250,6 +272,40 @@ export default function GeneralForm() {
                         label: { color: "white" },
                       }}
                     />
+     
+                      <Box sx={{ mt: 2 }}>
+                        <Typography sx={{ mb: 2, textAlign: "center" }}>
+                          Or choose from the list below:
+                        </Typography>
+
+                       
+                    {displayCategories.map((category) => (
+                      <Button
+                        key={category}
+                        onClick={() => setCategoryText(category)}
+                        sx={{
+
+                          color: "white",
+                          ":hover": { color: "green" },
+                          m: 1,
+                        }}
+                      >
+                        {category}
+                      </Button>
+                    ))}
+
+                      </Box>
+            
+
+
+
+              
+
+                    <Grid
+                      container
+                      spacing={2}
+                      sx={{ mt: 4, justifyContent: "space-evenly" }}
+                    ></Grid>
                   </Grid>
                 )}
                 {activeStep === 2 && (

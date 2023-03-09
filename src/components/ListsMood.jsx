@@ -7,7 +7,7 @@ import {
   TextField,
   Button,
 } from "@mui/material";
-import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
 export default function ListsMoods({ moods, onDelete, onModify }) {
   const formatDateTime = (dateTimeString) => {

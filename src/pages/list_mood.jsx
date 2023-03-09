@@ -17,6 +17,7 @@ export default function ListMoodPage() {
   const [error, setError] = useState(null);
   const [filterByDate, setFilterByDate] = useState(false);
   const [filterByRate, setFilterByRate] = useState(false);
+  const [filterByCategory, setFilterByCategory] = useState(false);
 
   const supabase = useSupabaseClient();
   const user = useUser();
@@ -204,6 +205,30 @@ const modifyMood = async (id, rating, category, description) => {
       return "🥰";
     }
   };
+
+  //create a function to sort the moods by category
+  const handleFilterByCategory = (category) => {
+    // Toggle the value of filterByCategory
+    setFilterByCategory((prevFilter) => !prevFilter);
+    // Sort moods by category in descending order (most recent first)
+    setMoods((prevMoods) =>
+      [...prevMoods].sort((a, b) => {
+        if (filterByCategory) {
+          return new Date(b.created_at) - new Date(a.created_at);
+        } else {
+          return new Date(a.created_at) - new Date(b.created_at);
+        }
+      })
+    );
+    if (filterByCategory) {
+      setMoods((prevMoods) =>
+        [...prevMoods].sort((a, b) => {
+          return new Date(b.created_at) - new Date(a.created_at);
+        })
+      );
+    }
+  };
+
 
   //save into database
   // const handleClick = async () => {
