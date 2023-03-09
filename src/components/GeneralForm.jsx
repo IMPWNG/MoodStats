@@ -13,10 +13,7 @@ import {
   Card,
   CardContent,
   IconButton,
-  Stack,
-  AlertTitle,
   Alert,
-  Snackbar,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -24,7 +21,6 @@ import { useTheme } from "@mui/material/styles";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 
 import { Inter } from "@next/font/google";
-import { ST } from "next/dist/shared/lib/utils";
 
 const inter = Inter({ subsets: ["latin"] });
 const steps = ["💬", "📁", "💯"];
@@ -35,30 +31,18 @@ export default function GeneralForm() {
   const [clicked, setClicked] = useState(null);
   const [categoryText, setCategoryText] = useState("");
   const [isAdded, setIsAdded] = useState(false);
+
   const [activeStep, setActiveStep] = useState(0);
-  const [skipped, setSkipped] = useState(new Set());
+
   const [alert, setAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState("error");
 
   const supabase = useSupabaseClient();
   const user = useUser();
 
   const theme = useTheme();
 
-  const isStepSkipped = (step) => {
-    return skipped.has(step);
-  };
-
   const handleNext = () => {
-    let newSkipped = skipped;
-    if (isStepSkipped(activeStep)) {
-      newSkipped = new Set(newSkipped.values());
-      newSkipped.delete(activeStep);
-    }
-
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    setSkipped(newSkipped);
   };
 
   const handleBack = () => {
@@ -69,30 +53,27 @@ export default function GeneralForm() {
     setActiveStep(0);
   };
 
-  const showAlert = (message, severity) => {
-    setAlertMessage(message);
-    setAlertSeverity(severity);
-    setAlert(true);
-  };
-
   const handleAddMood = async () => {
     const description = newDescriptionText.trim();
     const category = categoryText.trim();
     if (description.length === 0) {
-      showAlert("Description cannot be empty", "error");
+      setActiveStep(0);
+      setAlert(true);
       return;
     }
     if (category.length === 0) {
-      showAlert("Category cannot be empty", "error");
+      setActiveStep(1);
+      setAlert(true);
       return;
     }
     if (!clicked || clicked < 1 || clicked > 10) {
-      showAlert("Please select a rating", "error");
+      setActiveStep(2);
+      setAlert(true);
       return;
     }
 
     try {
-      const { data: moods, error } = await supabase.from("stats").insert([
+      const { data, error } = await supabase.from("stats").insert([
         {
           description,
           rating: clicked,
@@ -100,16 +81,16 @@ export default function GeneralForm() {
           category,
         },
       ]);
-      if (error) throw error;
+      setAlert(true);
+      setIsAdded(true);
       setNewDescriptionText("");
       setCategoryText("");
       setClicked(null);
-      setIsAdded(true);
-      showAlert("Mood added successfully", "success");
+      setActiveStep(0);
+
+      if (error) throw error;
     } catch (error) {
       console.log("error", error.message);
-
-      showAlert(error.message, "error");
     }
   };
 
@@ -173,9 +154,7 @@ export default function GeneralForm() {
             {steps.map((label, index) => {
               const stepProps = {};
               const labelProps = {};
-              if (isStepSkipped(index)) {
-                stepProps.completed = false;
-              }
+
               return (
                 <Step key={label} {...stepProps}>
                   <StepLabel {...labelProps}>{label}</StepLabel>
@@ -183,90 +162,54 @@ export default function GeneralForm() {
               );
             })}
           </Stepper>
+          {alert && (
+            <Alert
+              sx={{ mt: 4, mb: 4 }}
+              onClose={() => setInterval(setAlert(false), 2000)}
+            >
+              Mood added!
+            </Alert>
+          )}
+
           {activeStep === steps.length ? (
             <>
-              {isAdded ? (
-                <>
-                  <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-                    <Card sx={{ display: "flex", width: "100%" }}>
-                      <Box sx={{ display: "flex", flexDirection: "column" }}>
-                        <CardContent sx={{ flex: "1 0 auto" }}>
-                          <Typography component="div" variant="h5">
-                            {categoryText}
-                          </Typography>
-                          <Typography
-                            variant="subtitle1"
-                            color="text.secondary"
-                            component="div"
-                          >
-                            {newDescriptionText}
-                          </Typography>
-                          <Typography
-                            variant="subtitle1"
-                            color="text.secondary"
-                            component="div"
-                          >
-                            Rate:{" "}
-                            {" " + clicked + " " + getMostUsedEmoji(moods)}
-                          </Typography>
-                        </CardContent>
-                      </Box>
-                    </Card>
-                  </Box>
-                  <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-                    <Button
-                      onClick={handleAddMood}
-                      sx={{ ml: 1, justifyContent: "center", width: "100%" }}
-                      variant="contained"
+              <Typography sx={{ mt: 2, mb: 1 }}>
+                All steps completed - you can submit your mood!
+              </Typography>
+              <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+                <Card sx={{ display: "flex", width: "100%" }}>
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    <CardContent
+                      sx={{ justifyContent: "center", textAlign: "left" }}
                     >
-                      Submit
-                    </Button>
-       
+                      <Typography sx={{ fontWeight: "bold" }}>
+                        Category{" "}
+                      </Typography>
+                      {categoryText}
+                      <Typography sx={{ fontWeight: "bold", mb: 1, mt: 2 }}>
+                        Description{" "}
+                      </Typography>
+                      {newDescriptionText}
+                      <Typography sx={{ fontWeight: "bold", mb: 1, mt: 2 }}>
+                        Rate
+                      </Typography>{" "}
+                      {" " + clicked + " " + getMostUsedEmoji(moods)}
+                    </CardContent>
                   </Box>
-                  <Snackbar open={alert} autoHideDuration={6000}>
-                    <Alert severity={alertSeverity}>{alertMessage}</Alert>
-                  </Snackbar>
-                  
-                </>
-              ) : (
-                <>
-                  <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-                    <Card sx={{ display: "flex", width: "100%" }}>
-                      <Box sx={{ display: "flex", flexDirection: "column" }}>
-                        <CardContent sx={{ flex: "1 0 auto" }}>
-                          <Typography component="div" variant="h5">
-                            {categoryText}
-                          </Typography>
-                          <Typography
-                            variant="subtitle1"
-                            color="text.secondary"
-                            component="div"
-                          >
-                            {newDescriptionText}
-                          </Typography>
-                          <Typography
-                            variant="subtitle1"
-                            color="text.secondary"
-                            component="div"
-                          >
-                            Rate:{" "}
-                            {" " + clicked + " " + getMostUsedEmoji(moods)}
-                          </Typography>
-                        </CardContent>
-                      </Box>
-                    </Card>
-                  </Box>
-                  <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-                    <Button
-                      onClick={handleAddMood}
-                      sx={{ ml: 1, justifyContent: "center", width: "100%" }}
-                      variant="contained"
-                    >
-                      Submit
-                    </Button>
-                  </Box>
-                </>
-              )}
+                </Card>
+              </Box>
+
+              <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+                <Box sx={{ flex: "1 1 auto" }} />
+
+                <Button onClick={handleReset} sx={{ ml: 1 }}>
+                  Reset
+                </Button>
+                <Button onClick={handleBack} sx={{ ml: 1 }}>
+                  Back
+                </Button>
+                <Button onClick={handleAddMood}>Submit</Button>
+              </Box>
             </>
           ) : (
             <Grid container spacing={2}>
@@ -277,7 +220,6 @@ export default function GeneralForm() {
                       What's on your mind?
                     </Typography>
                     <TextField
-                      type="text"
                       id="description"
                       value={newDescriptionText}
                       label="Type your mood here..."
@@ -285,9 +227,6 @@ export default function GeneralForm() {
                       sx={{
                         width: "100%",
                         justifyContent: "center",
-                        border: 1,
-                        borderColor: "white",
-                        borderRadius: 2,
                         input: { color: "white" },
                         label: { color: "white" },
                       }}
@@ -301,16 +240,12 @@ export default function GeneralForm() {
                     </Typography>
                     <TextField
                       label="Type a category here..."
-                      type="text"
                       id="category"
                       value={categoryText}
                       onChange={(e) => setCategoryText(e.target.value)}
                       sx={{
                         width: "100%",
                         justifyContent: "center",
-                        border: 1,
-                        borderColor: "white",
-                        borderRadius: 2,
                         input: { color: "white" },
                         label: { color: "white" },
                       }}
@@ -443,6 +378,7 @@ export default function GeneralForm() {
                   </Grid>
                 )}
               </Grid>
+
               <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
                 <Button
                   color="inherit"
@@ -457,16 +393,6 @@ export default function GeneralForm() {
                 <Button onClick={handleNext}>
                   {activeStep === steps.length - 1 ? "See resume" : "Next"}
                 </Button>
-
-                {activeStep === steps.length - 1 && (
-                  <Button
-                    onClick={handleAddMood}
-                    sx={{ ml: 1 }}
-                    variant="contained"
-                  >
-                    Submit
-                  </Button>
-                )}
               </Box>
             </Grid>
           )}

@@ -7,6 +7,7 @@ import {
   TextField,
   Button,
 } from "@mui/material";
+import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 
 export default function ListsMoods({ moods, onDelete, onModify }) {
   const formatDateTime = (dateTimeString) => {
@@ -24,6 +25,7 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
   const [rating, setRating] = useState(moods.rating);
   const [category, setCategory] = useState(moods.category);
   const [description, setDescription] = useState(moods.description);
+  const supabase = useSupabaseClient();
 
   const handleOpenDialog = () => {
     setDialogOpen(true);
@@ -35,8 +37,17 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await onModify(moods.id, rating, category, description);
-    handleCloseDialog();
+    const { data, error } = await supabase
+      .from("stats")
+      .update({ rating, category, description })
+      .eq("id", moods.id);
+    if (error) {
+      console.log("error", error.message);
+    } else {
+      onModify();
+      setDialogOpen(false);
+      window.location.reload();
+    }
   };
 
   return (
@@ -63,6 +74,7 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
             e.preventDefault();
             e.stopPropagation();
             handleOpenDialog();
+            onModify();
           }}
         >
           Modify
