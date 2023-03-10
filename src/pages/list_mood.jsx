@@ -59,31 +59,30 @@ export default function ListMoodPage() {
     }
   };
 
-const modifyMood = async (id, rating, category, description) => {
-  try {
-    const { data: updatedMood, error } = await supabase
-      .from("stats")
-      .update({
-        rating: rating,
-        category: category,
-        description: description,
-      })
-      .eq("user_id", user.id);
+  const modifyMood = async (id, rating, category, description) => {
+    try {
+      const { data: updatedMood, error } = await supabase
+        .from("stats")
+        .update({
+          rating: rating,
+          category: category,
+          description: description,
+        })
+        .eq("user_id", user.id);
 
-    if (error) throw error;
-    setMoods((prevMoods) =>
-      prevMoods.map((mood) => {
-        if (mood.id === id) {
-          return updatedMood;
-        }
-        return mood;
-      })
-    );
-  } catch (error) {
-    console.log("error", error.message);
-  }
-};
-
+      if (error) throw error;
+      setMoods((prevMoods) =>
+        prevMoods.map((mood) => {
+          if (mood.id === id) {
+            return updatedMood;
+          }
+          return mood;
+        })
+      );
+    } catch (error) {
+      console.log("error", error.message);
+    }
+  };
 
   const handleFilterByDate = () => {
     // Toggle the value of filterByDate
@@ -228,7 +227,6 @@ const modifyMood = async (id, rating, category, description) => {
       );
     }
   };
-
 
   //save into database
   // const handleClick = async () => {
@@ -380,7 +378,6 @@ const modifyMood = async (id, rating, category, description) => {
             />
           ))}
       </Grid>
-      
     </Grid>
   );
 }

@@ -15,9 +15,6 @@ import {
   IconButton,
   Alert,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { useTheme } from "@mui/material/styles";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 
 import { Inter } from "@next/font/google";
@@ -34,7 +31,7 @@ export default function GeneralForm() {
   const [activeStep, setActiveStep] = useState(0);
   const [alert, setAlert] = useState(false);
   const [createCategory, setCreateCategory] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [category, setCategory] = useState([]);
 
   useEffect(() => {
     const getCategories = async () => {
@@ -51,15 +48,6 @@ export default function GeneralForm() {
     getCategories();
   }, []);
 
-  const displayCategories = createCategory.map((category) => {
-    return (
-      <option key={category} value={category}>
-        {category}
-      </option>
-    );
-  });
-
-
   const supabase = useSupabaseClient();
   const user = useUser();
 
@@ -74,6 +62,14 @@ export default function GeneralForm() {
   const handleReset = () => {
     setActiveStep(0);
   };
+
+  const displayCategories = createCategory.map((category) => {
+    return (
+      <option key={category} value={category}>
+        {category}
+      </option>
+    );
+  });
 
   const handleAddMood = async () => {
     const description = newDescriptionText.trim();
@@ -220,10 +216,8 @@ export default function GeneralForm() {
                   </Box>
                 </Card>
               </Box>
-
               <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
                 <Box sx={{ flex: "1 1 auto" }} />
-
                 <Button onClick={handleReset} sx={{ ml: 1 }}>
                   Reset
                 </Button>
@@ -261,45 +255,58 @@ export default function GeneralForm() {
                       How you categorise your mood?
                     </Typography>
                     <TextField
-                      label="Type a category here..."
                       id="category"
                       value={categoryText}
-                      onChange={(e) => setCategoryText(e.target.value)}
                       sx={{
-                        width: "100%",
                         justifyContent: "center",
                         input: { color: "white" },
                         label: { color: "white" },
+                        textAlign: "center",
+                        mb: 4,
                       }}
                     />
-     
-                      <Box sx={{ mt: 2 }}>
-                        <Typography sx={{ mb: 2, textAlign: "center" }}>
-                          Or choose from the list below:
-                        </Typography>
 
-                       
-                    {displayCategories.map((category) => (
+                    <Box sx={{ display: "flex", flexDirection: "row" }}>
+                      <Box sx={{ flex: "1 1 auto" }} />
+
                       <Button
-                        key={category}
-                        onClick={() => setCategoryText(category)}
-                        sx={{
-
-                          color: "white",
-                          ":hover": { color: "green" },
-                          m: 1,
-                        }}
+                        onClick={() => setCategoryText("Work")}
+                        sx={{ ml: 1 }}
                       >
-                        {category}
+                        Work
                       </Button>
-                    ))}
-
-                      </Box>
-            
-
-
-
-              
+                      <Button
+                        onClick={() => setCategoryText("Personal")}
+                        sx={{ ml: 1 }}
+                      >
+                        Personal
+                      </Button>
+                      <Button
+                        onClick={() => setCategoryText("Family")}
+                        sx={{ ml: 1 }}
+                      >
+                        Family
+                      </Button>
+                      <Button
+                        onClick={() => setCategoryText("Friends")}
+                        sx={{ ml: 1 }}
+                      >
+                        Friends
+                      </Button>
+                      <Button
+                        onClick={() => setCategoryText("Health")}
+                        sx={{ ml: 1 }}
+                      >
+                        Health
+                      </Button>
+                      <Button
+                        onClick={() => setCategoryText("Hobbies")}
+                        sx={{ ml: 1 }}
+                      >
+                        Hobbies
+                      </Button>
+                      <Box sx={{ flex: "1 1 auto" }} />
+                    </Box>
 
                     <Grid
                       container
@@ -329,7 +336,6 @@ export default function GeneralForm() {
                       >
                         1
                       </Button>
-
                       <Button
                         className={getButtonClass(2)}
                         onClick={() => handleClickedButton(2)}
@@ -341,7 +347,6 @@ export default function GeneralForm() {
                       >
                         2
                       </Button>
-
                       <Button
                         className={getButtonClass(3)}
                         onClick={() => handleClickedButton(3)}
