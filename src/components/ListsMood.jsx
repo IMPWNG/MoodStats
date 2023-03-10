@@ -34,7 +34,6 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
       async function fetchCategories() {
         const { data: categoriesData, error } = await supabase
           .from("stats")
-
           .select("category");
 
         if (error) {

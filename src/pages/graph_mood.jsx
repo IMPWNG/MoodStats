@@ -5,7 +5,7 @@ import { Grid, Typography, Button } from "@mui/material";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import Link from "next/link";
 
-export default function GraphMoodPage({ session }) {
+export default function GraphMoodPage() {
   const [moods, setMoods] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -30,8 +30,10 @@ export default function GraphMoodPage({ session }) {
         console.log("error", error.message);
       }
     }
-    fetchMoods();
-  }, [session]);
+    if (user) {
+      fetchMoods();
+    }
+  }, [user]);
 
   return (
     <Grid container spacing={3} direction="column" alignItems="center">
@@ -43,7 +45,7 @@ export default function GraphMoodPage({ session }) {
           <Button variant="contained">Back to Home</Button>
         </Link>
       </Grid>
-      <StatsMood session={moods} />
+      <StatsMood moods={moods} />
     </Grid>
   );
 }
