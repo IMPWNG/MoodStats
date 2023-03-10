@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -6,6 +6,8 @@ import {
   DialogActions,
   TextField,
   Button,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
@@ -25,7 +27,24 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
   const [rating, setRating] = useState(moods.rating);
   const [category, setCategory] = useState(moods.category);
   const [description, setDescription] = useState(moods.description);
+  const [categories, setCategories] = useState([]);
   const supabase = useSupabaseClient();
+
+    useEffect(() => {
+      async function fetchCategories() {
+        const { data: categoriesData, error } = await supabase
+          .from("stats")
+
+          .select("category");
+
+        if (error) {
+          console.log("error", error.message);
+        } else {
+          setCategories(categoriesData);
+        }
+      }
+      fetchCategories();
+    }, []);
 
   const handleOpenDialog = () => {
     setDialogOpen(true);
@@ -37,6 +56,10 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+     if (rating > 10) {
+       alert("Rating cannot be more than 10");
+       return;
+     }
     const { data, error } = await supabase
       .from("stats")
       .update({ rating, category, description })
@@ -83,6 +106,7 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
           <DialogTitle>Modify Mood</DialogTitle>
           <DialogContent>
             <form onSubmit={handleSubmit}>
+           
               <TextField
                 autoFocus
                 margin="dense"
@@ -93,7 +117,7 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
                 value={rating}
                 onChange={(e) => setRating(e.target.value)}
               />
-              <TextField
+              <Select
                 autoFocus
                 margin="dense"
                 id="category"
@@ -102,7 +126,18 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
                 fullWidth
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-              />
+              >
+                {categories.map((category, item) => (
+                  <MenuItem key={item} value={category.category}>
+                    {category.category}
+                  </MenuItem>
+                  
+                ))}
+              </Select>
+
+
+             
+              
               <TextField
                 autoFocus
                 margin="dense"

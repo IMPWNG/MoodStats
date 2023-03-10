@@ -31,7 +31,7 @@ export default function GeneralForm() {
   const [activeStep, setActiveStep] = useState(0);
   const [alert, setAlert] = useState(false);
   const [createCategory, setCreateCategory] = useState([]);
-  const [category, setCategory] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     const getCategories = async () => {
@@ -44,6 +44,7 @@ export default function GeneralForm() {
       const categories = data.map((item) => item.category);
       const uniqueCategories = [...new Set(categories)];
       setCreateCategory(uniqueCategories);
+      setCategories(data);
     };
     getCategories();
   }, []);
@@ -62,14 +63,6 @@ export default function GeneralForm() {
   const handleReset = () => {
     setActiveStep(0);
   };
-
-  const displayCategories = createCategory.map((category) => {
-    return (
-      <option key={category} value={category}>
-        {category}
-      </option>
-    );
-  });
 
   const handleAddMood = async () => {
     const description = newDescriptionText.trim();
@@ -162,6 +155,16 @@ export default function GeneralForm() {
     } else {
       return "🥰";
     }
+  };
+
+  const getUniqueCategories = (categories) => {
+    const uniqueCategories = [];
+    categories.forEach((category) => {
+      if (!uniqueCategories.includes(category.category)) {
+        uniqueCategories.push(category.category);
+      }
+    });
+    return uniqueCategories;
   };
 
   return (
@@ -268,6 +271,16 @@ export default function GeneralForm() {
 
                     <Box sx={{ display: "flex", flexDirection: "row" }}>
                       <Box sx={{ flex: "1 1 auto" }} />
+                      {getUniqueCategories(categories).map((category) => {
+                        return (
+                          <Button
+                            onClick={() => setCategoryText(category)}
+                            sx={{ ml: 1 }}
+                          >
+                            {category}
+                          </Button>
+                        );
+                      })}
 
                       <Button
                         onClick={() => setCategoryText("Work")}
