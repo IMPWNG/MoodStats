@@ -8,6 +8,12 @@ import {
   Button,
   Select,
   MenuItem,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+
 } from "@mui/material";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
@@ -39,7 +45,8 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
         if (error) {
           console.log("error", error.message);
         } else {
-          setCategories(categoriesData);
+          const uniqueCategories =  new Set(categoriesData.map((category) => category.category));
+          setCategories([...uniqueCategories]);
         }
       }
       fetchCategories();
@@ -72,16 +79,66 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
     }
   };
 
+const getBorderColor = (rating) => {
+  if (rating >= 8) {
+    return "green";
+  } else if (rating >= 6) {
+    return "yellow";
+  } else if (rating >= 4) {
+    return "orange";
+  } else {
+    return "red";
+  }
+};
+
+
   return (
-    <li
-      onClick={(e) => {
-        e.preventDefault();
-      }}
-      className="flex items-center justify-between px-4 py-4 sm:px-6"
-    >
-      <div className="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-xl hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-        <button
-          className="float-right text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+    <Card variant="outlined" sx={{ mb: 2, border: 4, borderColor: getBorderColor(moods.rating)}}>
+      <CardContent>
+        <Typography variant="h5" component="h2" sx={{ mb: 1.5 }}>
+          <Typography
+            sx={{ textDecoration: "underline" }}
+            color="text.secondary"
+            variant="h5"
+            component="h2"
+          >
+            Content:
+          </Typography>
+          {moods.description}
+        </Typography>
+        <Typography sx={{ mb: 1.5 }} color="text.secondary">
+          <Typography
+            sx={{ textDecoration: "underline" }}
+            color="text.secondary"
+          >
+            Rate:
+          </Typography>{" "}
+          {moods.rating}
+        </Typography>
+        <Typography sx={{ mb: 1.5 }} color="text.secondary">
+          <Typography
+            sx={{ textDecoration: "underline" }}
+            color="text.secondary"
+          >
+            Category:
+          </Typography>{" "}
+          {moods.category}
+        </Typography>
+        <Typography sx={{ mb: 1.5 }} color="text.secondary">
+          <Typography
+            sx={{ textDecoration: "underline" }}
+            color="text.secondary"
+          >
+            Created At:
+          </Typography>{" "}
+          {formatDateTime(moods.created_at)}
+        </Typography>
+
+      </CardContent>
+      <CardActions>
+        <Button
+          size="small"
+          color="error"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -89,9 +146,10 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
           }}
         >
           Delete
-        </button>
-        <button
-          className="float-right text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900"
+        </Button>
+        <Button
+          size="small"
+          color="primary"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -100,104 +158,54 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
           }}
         >
           Modify
-        </button>
-        <Dialog open={dialogOpen} onClose={handleCloseDialog}>
-          <DialogTitle>Modify Mood</DialogTitle>
-          <DialogContent>
-            <form onSubmit={handleSubmit}>
-           
-              <TextField
-                autoFocus
-                margin="dense"
-                id="rating"
-                label="Rating"
-                type="number"
-                fullWidth
-                value={rating}
-                onChange={(e) => setRating(e.target.value)}
-              />
-              <Select
-                autoFocus
-                margin="dense"
-                id="category"
-                label="Category"
-                type="text"
-                fullWidth
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                {categories.map((category, item) => (
-                  <MenuItem key={item} value={category.category}>
-                    {category.category}
-                  </MenuItem>
-                  
-                ))}
-              </Select>
-
-
-             
+        </Button>
+      </CardActions>
+      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+        <DialogTitle>Modify Mood</DialogTitle>
+        <DialogContent>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="description"
+              label="Description"
+              type="text"
+              fullWidth
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="rating"
+              label="Rating"
+              type="number"
+              fullWidth
+              value={rating}
+              onChange={(e) => setRating(e.target.value)}
+            />
+            <Select
+              labelId="category"
+              id="category"
+              value={category}
+              label="Category"
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              {categories.map((category) => (
+                <MenuItem key={category} value={category}>
+                  {category}
+                </MenuItem>
+              ))}
               
-              <TextField
-                autoFocus
-                margin="dense"
-                id="description"
-                label="Description"
-                type="text"
-                fullWidth
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </form>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseDialog}>Cancel</Button>
-            <Button onClick={handleSubmit}>Submit</Button>
-          </DialogActions>
-        </Dialog>
+            </Select>
+            <DialogActions>
+              <Button onClick={handleCloseDialog}>Cancel</Button>
 
-        <h2 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-          {moods.rating == 1 && (
-            <span className="text-red-500"> {moods.description} 😡</span>
-          )}
-          {moods.rating == 2 && (
-            <span className="text-red-500"> {moods.description} 😡</span>
-          )}
-          {moods.rating == 3 && (
-            <span className="text-red-500"> {moods.description} 😟</span>
-          )}
-          {moods.rating == 4 && (
-            <span className="text-orange-500"> {moods.description} 😐</span>
-          )}
-          {moods.rating == 5 && (
-            <span className="text-orange-500"> {moods.description} 😐</span>
-          )}
-          {moods.rating == 6 && (
-            <span className="text-yellow-500"> {moods.description} 🙂</span>
-          )}
-          {moods.rating == 7 && (
-            <span className="text-yellow-500"> {moods.description} 😃</span>
-          )}
-          {moods.rating == 8 && (
-            <span className="text-green-500"> {moods.description} 🥰</span>
-          )}
-          {moods.rating == 9 && (
-            <span className="text-green-500"> {moods.description} 🥰</span>
-          )}
-          {moods.rating == 10 && (
-            <span className="text-green-500"> {moods.description} 🥰</span>
-          )}
-        </h2>
-        <span className="mr-2 text-black dark:text-gray-400">
-          Rating: {moods.rating}/10
-        </span>
-        <span className="mr-2 text-black dark:text-gray-400">
-          Created: {formatDateTime(moods.created_at)}
-        </span>
-        <br />
-        <span className="mr-2 text-black dark:text-gray-400">
-          Category: {moods.category}
-        </span>
-      </div>
-    </li>
+              <Button type="submit">Save</Button>
+            </DialogActions>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </Card>
   );
 }

@@ -8,6 +8,10 @@ import {
   FormGroup,
   FormControlLabel,
   Button,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
 } from "@mui/material";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 
@@ -18,6 +22,7 @@ export default function ListMoodPage() {
   const [filterByDate, setFilterByDate] = useState(false);
   const [filterByRate, setFilterByRate] = useState(false);
   const [filterByCategory, setFilterByCategory] = useState(false);
+  const [categories, setCategories] = useState([]);
 
   const supabase = useSupabaseClient();
   const user = useUser();
@@ -33,6 +38,8 @@ export default function ListMoodPage() {
           .eq("user_id", user?.id || "");
 
         if (error) throw error;
+        const uniqueCategories = new Set(moods.map((mood) => mood.category));
+        setCategories([...uniqueCategories].filter(Boolean));
         setLoading(false);
         setMoods(moods);
       } catch (error) {
@@ -121,6 +128,29 @@ export default function ListMoodPage() {
     );
   };
 
+  //create a function to sort the moods by category
+  const handleFilterByCategory = () => {
+    // Toggle the value of filterByCategory
+    setFilterByCategory((prevFilter) => !prevFilter);
+    // Sort moods by category in descending order (most recent first)
+    setMoods((prevMoods) =>
+      [...prevMoods].sort((a, b) => {
+        if (filterByCategory) {
+          return new Date(b.created_at) - new Date(a.created_at);
+        } else {
+          return new Date(a.created_at) - new Date(b.created_at);
+        }
+      })
+    );
+    if (filterByCategory) {
+      setMoods((prevMoods) =>
+        [...prevMoods].sort((a, b) => {
+          return new Date(b.created_at) - new Date(a.created_at);
+        })
+      );
+    }
+  };
+
   const getMostUsedCategory = (moods) => {
     const categoryCounts = {};
     moods.forEach((moods) => {
@@ -202,29 +232,6 @@ export default function ListMoodPage() {
       return "🙂";
     } else {
       return "🥰";
-    }
-  };
-
-  //create a function to sort the moods by category
-  const handleFilterByCategory = (category) => {
-    // Toggle the value of filterByCategory
-    setFilterByCategory((prevFilter) => !prevFilter);
-    // Sort moods by category in descending order (most recent first)
-    setMoods((prevMoods) =>
-      [...prevMoods].sort((a, b) => {
-        if (filterByCategory) {
-          return new Date(b.created_at) - new Date(a.created_at);
-        } else {
-          return new Date(a.created_at) - new Date(b.created_at);
-        }
-      })
-    );
-    if (filterByCategory) {
-      setMoods((prevMoods) =>
-        [...prevMoods].sort((a, b) => {
-          return new Date(b.created_at) - new Date(a.created_at);
-        })
-      );
     }
   };
 
@@ -353,6 +360,21 @@ export default function ListMoodPage() {
             }
             label="Sort by Rating"
           />
+          <FormControlLabel
+            control={
+             <><InputLabel>Category</InputLabel><Select
+                value=""
+                onChange={handleFilterByCategory}
+                disabled={loading || error}
+              >
+                <MenuItem value="">All</MenuItem>
+                {Array.isArray(categories) && categories.map((category, index) => (
+                  <MenuItem key={index} value={category}>{category}</MenuItem>
+                ))}
+              </Select></>
+            }
+            label="Sort by Category"
+          />
         </FormGroup>
       </Grid>
 
@@ -361,22 +383,39 @@ export default function ListMoodPage() {
           moods
             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
             .map((moods) => (
+              <Grid item xs={12} sx={{ mt: 4, m: 4 }}>
+                <ListsMood
+                  key={moods.id}
+                  moods={moods}
+                  onDelete={() => deleteMood(moods.id)}
+                  onModify={() => modifyMood()}
+                />
+              </Grid>
+            ))}
+        {!filterByDate &&
+          moods.map((moods) => (
+            <Grid item xs={12} sx={{ mt: 4, m: 4 }}>
               <ListsMood
                 key={moods.id}
                 moods={moods}
                 onDelete={() => deleteMood(moods.id)}
                 onModify={() => modifyMood()}
               />
-            ))}
-        {!filterByDate &&
-          moods.map((moods) => (
-            <ListsMood
-              key={moods.id}
-              moods={moods}
-              onDelete={() => deleteMood(moods.id)}
-              onModify={() => modifyMood()}
-            />
+            </Grid>
           ))}
+        {filterByCategory &&
+          moods
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .map((moods) => (
+              <Grid item xs={12} sx={{ mt: 4, m: 4 }}>
+                <ListsMood
+                  key={moods.id}
+                  moods={moods}
+                  onDelete={() => deleteMood(moods.id)}
+                  onModify={() => modifyMood()}
+                />
+              </Grid>
+            ))}
       </Grid>
     </Grid>
   );
