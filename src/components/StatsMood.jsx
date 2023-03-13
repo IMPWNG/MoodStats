@@ -1,4 +1,4 @@
-import { Line } from "react-chartjs-2";
+import { Line, Bar, registerables } from "react-chartjs-2";
 
 import {
   Chart,
@@ -9,6 +9,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  BarElement,
 } from "chart.js";
 import {
   Button,
@@ -19,7 +20,7 @@ import {
   List,
   ListItem,
   ListItemText,
-  Grid
+  Grid,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useState } from "react";
@@ -32,6 +33,7 @@ Chart.register(
   Tooltip,
   Legend
 );
+Chart.register(BarElement);
 
 export const options = {
   responsive: true,
@@ -64,7 +66,7 @@ export const options = {
 };
 
 export default function StatsMood({ moods: data }) {
-       const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const formatDateTime = (dateTimeString, format) => {
     const date = new Date(dateTimeString);
     const year = date.getFullYear();
@@ -95,6 +97,21 @@ export default function StatsMood({ moods: data }) {
     formatDateTime(item.created_at, "date")
   );
 
+  const sortedDataByCategory = data?.sort((a, b) => a.category - b.category);
+
+  const dataByCategory = {};
+  sortedDataByCategory?.forEach((item) => {
+    if (!dataByCategory[item.category]) {
+      dataByCategory[item.category] = [];
+    }
+    dataByCategory[item.category].push(item);
+  });
+
+  const countByCategory = Object.keys(dataByCategory).map((category) => ({
+    category,
+    count: dataByCategory[category].length,
+  }));
+
   const dataByDay = {};
 
   sortedDataByDate?.forEach((item) => {
@@ -105,6 +122,10 @@ export default function StatsMood({ moods: data }) {
     dataByDay[dateStr].push(item);
   });
 
+  const countByDay = Object.keys(dataByDay).map((dateStr) => ({
+    date: dateStr,
+    count: dataByDay[dateStr].length,
+  }));
 
   function logDataByDay(data) {
     const dataByDay = {};
@@ -120,10 +141,8 @@ export default function StatsMood({ moods: data }) {
     for (const dateStr in dataByDay) {
       const items = dataByDay[dateStr];
       const buttonLabel = `${dateStr}: You wrote (${items.length}) quotes`;
- 
 
       const toggleExpanded = () => {
-        
         setExpanded(!expanded);
       };
 
@@ -153,11 +172,11 @@ export default function StatsMood({ moods: data }) {
     return <div>{dayElements}</div>;
   }
 
-  const chartData = {
+  const chartDataRate = {
     labels: labels,
     datasets: [
       {
-        label: "Rate/Date",
+        label: "Rate",
         data: data?.map((item) => item.rating),
         borderColor: "rgb(255, 99, 132)",
         backgroundColor: "rgba(255, 99, 132, 0.5)",
@@ -167,14 +186,40 @@ export default function StatsMood({ moods: data }) {
     options: {
       scales: {
         x: {
-          type: "category",
+          type: "date",
           labels: data?.map((item) => formatDateTime(item.created_at, "date")),
         },
       },
     },
   };
 
-  const options = {
+  const chartDataCount = {
+    labels: countByDay?.map((item) => item.date),
+    datasets: [
+      {
+        label: "Count",
+        data: countByDay?.map((item) => item.count),
+        borderColor: "rgb(255, 99, 132)",
+        backgroundColor: "rgba(255, 99, 132, 0.5)",
+        yAxisID: "y",
+      },
+    ],
+  };
+
+  const chartDataCountByCategory = {
+    labels: countByCategory?.map((item) => item.category),
+    datasets: [
+      {
+        label: "Count",
+        data: countByCategory?.map((item) => item.count),
+        borderColor: "rgb(255, 99, 132)",
+        backgroundColor: "rgba(255, 99, 132, 0.5)",
+        yAxisID: "y",
+      },
+    ],
+  };
+
+  const optionsRate = {
     responsive: true,
     interaction: {
       mode: "index",
@@ -184,7 +229,67 @@ export default function StatsMood({ moods: data }) {
     plugins: {
       title: {
         display: true,
-        text: "Chart.js Line Chart - Multi Axis",
+        text: "See the rate of your mood by date",
+      },
+      ChartRough: {
+        roughness: 2,
+        bowing: 2,
+      },
+    },
+
+    scales: {
+      yAxes: [
+        {
+          ticks: {
+            suggestedMin: 0,
+            suggestedMax: 100,
+          },
+        },
+      ],
+    },
+  };
+
+  const optionsCount = {
+    responsive: true,
+    interaction: {
+      mode: "index",
+      intersect: false,
+    },
+    stacked: false,
+    plugins: {
+      title: {
+        display: true,
+        text: "See the count of your description created by day",
+      },
+      ChartRough: {
+        roughness: 2,
+        bowing: 2,
+      },
+    },
+
+    scales: {
+      yAxes: [
+        {
+          ticks: {
+            suggestedMin: 0,
+            suggestedMax: 100,
+          },
+        },
+      ],
+    },
+  };
+
+  const optionsCategoryCount = {
+    responsive: true,
+    interaction: {
+      mode: "index",
+      intersect: false,
+    },
+    stacked: false,
+    plugins: {
+      title: {
+        display: true,
+        text: "See the count of your created description by category",
       },
       ChartRough: {
         roughness: 2,
@@ -216,14 +321,29 @@ export default function StatsMood({ moods: data }) {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} sx={{ ml: 4, mr: 4 }}>
-       <Button variant="contained" onClick={() => setExpanded(!expanded)}>
+        <Button variant="contained" onClick={() => setExpanded(!expanded)} sx={{ mb: 2, textAlign: "center", justifyContent: "center", display: "flex" }}>
           {expanded ? "Hide" : "Show"} Data
         </Button>
-      {expanded && logDataByDay(sortedDataByDate)}
-       
-
-        <Line data={chartData} options={options} legend={legend} />
+        <Typography variant="h5" sx={{ mb: 2 }}>
+        {expanded && logDataByDay(sortedDataByDate)}
+        </Typography>
       </Grid>
+      <Grid item xs={12} sx={{ ml: 4, mr: 4 }}>
+
+
+      <Line data={chartDataRate} options={optionsRate} legend={legend} />
+      </Grid>
+      <Grid item xs={12} sx={{ ml: 4, mr: 4 }}>
+      <Line data={chartDataCount} options={optionsCount} legend={legend} />
+      </Grid>
+      <Grid item xs={12} sx={{ ml: 4, mr: 4 }}>
+      <Bar
+        data={chartDataCountByCategory}
+        options={optionsCategoryCount}
+        legend={legend}
+      />
+      </Grid>
+
     </Grid>
   );
 }

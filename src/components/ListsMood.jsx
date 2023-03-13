@@ -191,8 +191,8 @@ const getBorderColor = (rating) => {
               label="Category"
               onChange={(e) => setCategory(e.target.value)}
             >
-              {categories.map((category) => (
-                <MenuItem key={category} value={category}>
+              {categories.map((category, index) => (
+                <MenuItem key={index} value={category}>
                   {category}
                 </MenuItem>
               ))}

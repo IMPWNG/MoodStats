@@ -11,7 +11,6 @@ import {
   Select,
   MenuItem,
   InputLabel,
-  FormControl,
 } from "@mui/material";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 
@@ -34,7 +33,6 @@ export default function ListMoodPage() {
         const { data: moods, error } = await supabase
           .from("stats")
           .select("*")
-          .order("created_at", { ascending: false })
           .eq("user_id", user?.id || "");
 
         if (error) throw error;
@@ -91,64 +89,23 @@ export default function ListMoodPage() {
     }
   };
 
-  const handleFilterByDate = () => {
-    // Toggle the value of filterByDate
-    setFilterByDate((prevFilter) => !prevFilter);
-    // Sort moods by created_at in descending order (most recent first)
-    setMoods((prevMoods) =>
-      [...prevMoods].sort((a, b) => {
-        if (filterByDate) {
-          return new Date(b.created_at) - new Date(a.created_at);
-        } else {
-          return new Date(a.created_at) - new Date(b.created_at);
-        }
-      })
+  const countMoodsYear = (moods) => {
+    const currentYear = new Date(2023, 0, 1);
+    const moodSinceYear = moods.filter(
+      (mood) => new Date(mood.created_at) > currentYear
     );
-    if (filterByDate) {
-      setMoods((prevMoods) =>
-        [...prevMoods].sort((a, b) => {
-          return new Date(b.created_at) - new Date(a.created_at);
-        })
-      );
-    }
+    const count = moodSinceYear.length;
+    return count;
   };
 
-  const handleFilterByRate = () => {
-    // Toggle the value of filterByRate
-    setFilterByRate((prevFilter) => !prevFilter);
-    // Sort moods by rating in descending order (highest rating first)
-    setMoods((prevMoods) =>
-      [...prevMoods].sort((a, b) => {
-        if (filterByRate) {
-          return a.rating - b.rating;
-        } else {
-          return b.rating - a.rating;
-        }
-      })
+  const countMoodsMonth = (moods) => {
+    const today = new Date();
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const filteredMoods = moods.filter(
+      (mood) => mood.createdAt >= startOfMonth
     );
-  };
 
-  //create a function to sort the moods by category
-  const handleFilterByCategory = () => {
-    // Toggle the value of filterByCategory
-    setFilterByCategory((prevFilter) => !prevFilter);
-    // Sort moods by category in descending order (most recent first)
-    setMoods((prevMoods) =>
-      [...prevMoods].sort((a, b) => {
-        if (filterByCategory) {
-          return new Date(b.created_at) - new Date(a.created_at);
-        } else {
-          return new Date(a.created_at) - new Date(b.created_at);
-        }
-      })
-    );
-    if (filterByCategory) {
-      setMoods((prevMoods) =>
-        [...prevMoods].sort((a, b) => {
-          return new Date(b.created_at) - new Date(a.created_at);
-        })
-      );
-    }
+    return filteredMoods.length;
   };
 
   const getMostUsedCategory = (moods) => {
@@ -235,7 +192,81 @@ export default function ListMoodPage() {
     }
   };
 
-  //save into database
+  //create a function to change color of the rating based on the value of the rating
+  const getRatingColor = (moods) => {
+    const ratings = moods.map((mood) => parseFloat(mood.rating));
+    const averageRating =
+      ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length;
+
+    if (averageRating >= 1 && averageRating <= 2) {
+      return "red";
+    } else if (averageRating >= 3 && averageRating <= 5) {
+      return "orange";
+    } else if (averageRating >= 6 && averageRating <= 7) {
+      return "yellow";
+    } else if (averageRating >= 8 && averageRating <= 10) {
+      return "green";
+    } else {
+      return "invalid rating";
+    }
+  };
+
+  const handleFilterByDate = () => {
+    // Toggle the value of filterByDate
+    setFilterByDate((prevFilter) => !prevFilter);
+    // Sort moods by created_at in the desired order (most recent or oldest first)
+    setMoods((prevMoods) =>
+      [...prevMoods].sort((a, b) => {
+        const dateA = new Date(a.created_at);
+        const dateB = new Date(b.created_at);
+        if (filterByDate) {
+          return dateA - dateB;
+        } else {
+          return dateB - dateA;
+        }
+      })
+    );
+  };
+
+  const handleFilterByRate = () => {
+    // Toggle the value of filterByRate
+    setFilterByRate((prevFilter) => !prevFilter);
+    // Sort moods by rating in descending order (highest rating first)
+    setMoods((prevMoods) =>
+      [...prevMoods].sort((a, b) => {
+        if (filterByRate) {
+          return a.rating - b.rating;
+        } else {
+          return b.rating - a.rating;
+        }
+      })
+    );
+  };
+
+  //create a function to sort the moods by category
+  const handleFilterByCategory = (selectedCategory) => {
+    // Toggle the value of filterByCategory
+    setFilterByCategory((prevFilter) => !prevFilter);
+
+    // Filter moods by selected category
+    const filteredMoods = selectedCategory
+      ? moods.filter((mood) => mood.category === selectedCategory)
+      : moods;
+
+    // Sort filtered moods by category in ascending order
+    const sortedMoods = [...filteredMoods].sort((a, b) => {
+      if (filterByCategory) {
+        return a.category.localeCompare(b.category);
+      } else {
+        return b.category.localeCompare(a.category);
+      }
+    });
+
+    // Update the state with sorted and filtered moods
+    setMoods(sortedMoods);
+  };
+
+  //save into other database
   // const handleClick = async () => {
   //   setStatus("loading");
   //   setLoading(true);
@@ -282,6 +313,17 @@ export default function ListMoodPage() {
   //   }
   // };
 
+  //create a function to loop trough the moods, get the rate and calculate the average
+  const getAverageRating = (moods) => {
+    const ratings = moods.map((mood) => parseFloat(mood.rating));
+    const sum = ratings.reduce((sum, rating) => sum + rating, 0);
+    const averageRating = sum / ratings.length;
+    return averageRating;
+  };
+
+  const ratingColor = getRatingColor(moods);
+  const averageRating = getAverageRating(moods);
+
   return (
     <Grid container spacing={3} direction="column" alignItems="center">
       <Grid item xs={12} sx={{ mt: 4 }}>
@@ -292,27 +334,31 @@ export default function ListMoodPage() {
           <Button variant="contained">Back to Home</Button>
         </Link>
       </Grid>
+      <Grid item xs={12}>
+        <Button variant="contained" onClick={() => handleClick(moods)}>
+          Save descriptions to description database
+        </Button>
+      </Grid>
 
-      {/* <div className="flex justify-between items-center p-4">
-       
-          <Link href="/">
-            {" "}
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-              Add moods
-            </button>
-          </Link>
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            onClick={() => handleClick(moods)}
-          >
-            Save descriptions to database
-          </button>
-        </div> */}
       <Grid item xs={12}>
         {getMostUsedCategory(moods) ? (
           <>
-            Most used category:
-            <span className="text-green-500">{getMostUsedCategory(moods)}</span>
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+              sx={{ textAlign: "center" }}
+            >
+              Most used category
+            </Typography>
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+              sx={{ color: "green", textAlign: "center" }}
+            >
+              {getMostUsedCategory(moods)}
+            </Typography>
           </>
         ) : (
           "Loading..."
@@ -320,17 +366,78 @@ export default function ListMoodPage() {
         <br />
         {getLessUsedCategory(moods) ? (
           <>
-            Less used category:
-            <span className="text-red-500">{getLessUsedCategory(moods)}</span>
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+              sx={{ textAlign: "center" }}
+            >
+              Less used category
+            </Typography>
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+              sx={{ color: "red", textAlign: "center" }}
+            >
+              {getLessUsedCategory(moods)}
+            </Typography>
           </>
         ) : (
           "Loading..."
         )}{" "}
         <br />
         <br />
-        {getMostUsedEmoji(moods)
-          ? `Your Mood is moslty: ${getMostUsedEmoji(moods)}`
-          : "Loading..."}{" "}
+        {getAverageRating(moods) ? (
+          <>
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+              sx={{ textAlign: "center" }}
+            >
+              Average rating
+            </Typography>
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+              sx={{
+                mb: 2,
+                textAlign: "center",
+                color: ratingColor,
+              }}
+            >
+              {averageRating.toFixed(2)} {getMostUsedEmoji(moods)}
+            </Typography>
+          </>
+        ) : (
+          "Loading..."
+        )}{" "}
+        <br />
+        {countMoodsYear(moods) ? (
+          <>
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+              sx={{ textAlign: "center" }}
+            >
+              Total Entry this years
+            </Typography>
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+              sx={{ textAlign: "center" }}
+            >
+              {countMoodsYear(moods)}
+            </Typography>
+          </>
+        ) : (
+          "Loading..."
+        )}{" "}
+        <br />
       </Grid>
 
       <Grid item xs={12} sx={{ mt: 4 }}>
@@ -342,39 +449,74 @@ export default function ListMoodPage() {
         >
           <FormControlLabel
             control={
-              <Checkbox
+              <Button
                 onClick={handleFilterByDate}
-                color="secondary"
-                sx={{ color: "grey.500" }}
-              />
-            }
-            label="Sort by Date"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                onClick={handleFilterByRate}
-                color="secondary"
-                sx={{ color: "grey.500" }}
-              />
-            }
-            label="Sort by Rating"
-          />
-          <FormControlLabel
-            control={
-             <><InputLabel>Category</InputLabel><Select
-                value=""
-                onChange={handleFilterByCategory}
                 disabled={loading || error}
+                variant="contained"
+                sx={{ width: "100%" }}
               >
-                <MenuItem value="">All</MenuItem>
-                {Array.isArray(categories) && categories.map((category, index) => (
-                  <MenuItem key={index} value={category}>{category}</MenuItem>
-                ))}
-              </Select></>
+                {filterByDate
+                  ? "Click to Oldest First"
+                  : "Click to Recent First"}
+              </Button>
             }
-            label="Sort by Category"
+            sx={{ mb: 2 }}
           />
+          <Typography variant="h4" component="h1" gutterBottom>
+            Filter by Date
+          </Typography>
+          <FormControlLabel
+            control={
+              <Button
+                onClick={handleFilterByRate}
+                disabled={loading || error}
+                variant="contained"
+                sx={{ width: "100%" }}
+              >
+                {filterByRate
+                  ? "Click to Lowest First"
+                  : "Click to Highest First"}
+              </Button>
+            }
+            sx={{ mb: 2 }}
+          />
+          <Typography variant="h4" component="h1" gutterBottom>
+            Filter by Rating
+          </Typography>
+          {/* <FormControlLabel
+            control={
+              <>
+                <Select
+                  value={categories}
+                  onChange={handleFilterByCategory}
+                  disabled={loading || error}
+                  sx={{
+                    color: "white",
+                    width: 200,
+                    border: 1,
+                    borderColor: "grey.500",
+                    borderRadius: 4,
+                    mr: 2,
+                    input: {
+                      color: "white",
+                    },
+                    InputLabelProps: {
+                      color: "white",
+                    },
+
+                  }}
+                >
+                 {categories.map((category) => (
+                    <MenuItem value={category}>{category}</MenuItem>
+                  ))}
+                  
+                </Select>
+              </>
+            }
+          />
+          <Typography variant="h4" component="h1" gutterBottom>
+            Filter by Category
+          </Typography> */}
         </FormGroup>
       </Grid>
 
@@ -403,9 +545,9 @@ export default function ListMoodPage() {
               />
             </Grid>
           ))}
-        {filterByCategory &&
+        {/* {filterByCategory &&
           moods
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .filter((moods) => moods.category === categories)
             .map((moods) => (
               <Grid item xs={12} sx={{ mt: 4, m: 4 }}>
                 <ListsMood
@@ -415,7 +557,7 @@ export default function ListMoodPage() {
                   onModify={() => modifyMood()}
                 />
               </Grid>
-            ))}
+            ))} */}
       </Grid>
     </Grid>
   );

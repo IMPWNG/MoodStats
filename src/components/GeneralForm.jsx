@@ -150,12 +150,18 @@ export default function GeneralForm() {
       mostUsedRating === "5"
     ) {
       return "😟";
-    } else if (mostUsedRating === "6" || mostUsedRating === "7") {
+    } else if (
+      mostUsedRating === "6" ||
+      mostUsedRating === "7" ||
+      mostUsedRating === "8" ||
+      mostUsedRating === "9"
+    ) {
       return "🙂";
-    } else {
+    } else if (mostUsedRating === "10") {
       return "🥰";
     }
   };
+
 
   const getUniqueCategories = (categories) => {
     const uniqueCategories = [];
