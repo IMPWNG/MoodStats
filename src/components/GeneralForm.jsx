@@ -13,6 +13,7 @@ import {
   IconButton,
   Alert,
 } from "@mui/material";
+import Link from "next/link";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import CircularProgress from "@mui/material/CircularProgress";
 
@@ -207,13 +208,14 @@ export default function GeneralForm() {
                 setAlert(true);
               }}
             >
-              Mood added!
+              Mood added!{" "}
+              <Link href="/list_mood" style={{ textDecoration: "underline" }}>
+                View your moods
+              </Link>
             </Alert>
           )}
-
           {activeStep === steps.length ? (
             <>
-              {/* //if description, category and rating are not empty, then show all steps completed */}
               {newDescriptionText.length > 0 &&
               categoryText.length > 0 &&
               clicked != null ? (
@@ -223,7 +225,6 @@ export default function GeneralForm() {
               ) : (
                 <Typography sx={{ mt: 2, mb: 1 }}>
                   You're missing some information!
-                  {/* //get the missing information from the user */}
                   {newDescriptionText.length === 0 && (
                     <Typography sx={{ mt: 2, mb: 1 }}>
                       Please add a{" "}

@@ -1,30 +1,15 @@
-import Link from "next/link";
 import ListsMood from "../components/ListsMood";
 import { useState, useEffect } from "react";
 import {
   Grid,
   Typography,
-  Checkbox,
   FormGroup,
   FormControlLabel,
   Button,
-  Select,
-  MenuItem,
-  InputLabel,
   Card,
-  CardContent,
-  CardActions,
   CardHeader,
-  CardMedia,
-  IconButton,
-  Avatar,
-  TextField,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   Box,
+  Alert,
 } from "@mui/material";
 import FolderIcon from "@mui/icons-material/Folder";
 import FiberNewIcon from "@mui/icons-material/FiberNew";
@@ -40,6 +25,8 @@ export default function ListMoodPage() {
   const [filterByRate, setFilterByRate] = useState(false);
   const [filterByCategory, setFilterByCategory] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [alertModify, setAlertModify] = useState(false);
+  const [alertDelete, setAlertDelete] = useState(false);
 
   const supabase = useSupabaseClient();
   const user = useUser();
@@ -76,6 +63,10 @@ export default function ListMoodPage() {
         .match({ id: id });
       if (error) throw error;
       setMoods(moods.filter((moods) => moods.id !== id));
+      setAlertDelete(true);
+      setTimeout(() => {
+        setAlertDelete(false);
+      }, 3000);
     } catch (error) {
       console.log("error", error.message);
     }
@@ -93,6 +84,7 @@ export default function ListMoodPage() {
         .eq("user_id", user.id);
 
       if (error) throw error;
+
       setMoods((prevMoods) =>
         prevMoods.map((mood) => {
           if (mood.id === id) {
@@ -101,6 +93,13 @@ export default function ListMoodPage() {
           return mood;
         })
       );
+      // Wait for the update to complete
+      await Promise.all([updatedMood]);
+      // Show the alert only when the fetch to get the update is done
+      setAlertModify(true);
+      setTimeout(() => {
+        setAlertModify(false);
+      }, 3000);
     } catch (error) {
       console.log("error", error.message);
     }
@@ -358,6 +357,28 @@ export default function ListMoodPage() {
         alignItems="center"
         sx={{ mt: 4, justifyContent: "center" }}
       >
+
+
+        {alertDelete && (
+          <Alert
+            severity="success"
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+
+              transform: "translate(-50%, -50%)",
+              width: "100%",
+              maxWidth: "500px",
+
+              boxShadow: 24,
+              p: 4,
+            }}
+          >
+            Mood deleted!
+          </Alert>
+        )}
+
         <Grid
           item
           xs={12}
@@ -429,7 +450,6 @@ export default function ListMoodPage() {
             />
           </Card>
         </Grid>
-
         <Grid
           item
           xs={12}
@@ -448,6 +468,9 @@ export default function ListMoodPage() {
               alignItems: "center",
             }}
           >
+            <Typography variant="h6" sx={{ mr: 2 }}>
+              Click to filter:
+            </Typography>
             <FormControlLabel
               control={
                 <Button
@@ -543,48 +566,42 @@ export default function ListMoodPage() {
           </FormGroup>
         </Grid>
       </Grid>
-      <Box sx={{ width: '100%' }}>
-      <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-        {filterByDate
-          ? moods
-              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-              .map((moods) => (
-         
+      <Box sx={{ width: "100%" }}>
+        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+          {filterByDate
+            ? moods
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .map((moods) => (
                   <ListsMood
                     moods={moods}
                     onDelete={() => deleteMood(moods.id)}
                     onModify={() => modifyMood()}
                   />
-        
-              ))
-          : !filterByRate
-          ? moods.map((moods) => (
-             
+                ))
+            : !filterByRate
+            ? moods.map((moods) => (
                 <ListsMood
                   moods={moods}
                   onDelete={() => deleteMood(moods.id)}
                   onModify={() => modifyMood()}
                 />
- 
-            ))
-          : moods
-              .sort((a, b) => b.rating - a.rating)
-              .map((moods) => (
-
+              ))
+            : moods
+                .sort((a, b) => b.rating - a.rating)
+                .map((moods) => (
                   <ListsMood
                     moods={moods}
                     onDelete={() => deleteMood(moods.id)}
                     onModify={() => modifyMood()}
                   />
-          
-              ))}
-      </Grid>
-    </Box>
+                ))}
+        </Grid>
+      </Box>
     </>
   );
 }
-      {
-        /* {filterByCategory &&
+{
+  /* {filterByCategory &&
       moods
         .filter((moods) => moods.category === categories)
         .map((moods) => (
@@ -597,4 +614,4 @@ export default function ListMoodPage() {
             />
           </Grid>
         ))} */
-      }
+}

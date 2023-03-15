@@ -215,6 +215,7 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
               e.stopPropagation();
               onDelete();
             }}
+            variant="contained"
           >
             Delete
           </Button>
@@ -227,6 +228,7 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
               handleOpenDialog();
               onModify();
             }}
+            variant="contained"
           >
             Modify
           </Button>
