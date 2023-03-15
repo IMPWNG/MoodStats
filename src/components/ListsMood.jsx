@@ -8,12 +8,20 @@ import {
   Button,
   Select,
   MenuItem,
-  Typography,
   Grid,
   Card,
   CardContent,
+  Typography,
   CardActions,
+  IconButton,
+  Menu,
+  ListItemText,
+  ListItemIcon,
+  useMediaQuery,
+  useTheme,
+  Box,
 } from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
 export default function ListsMoods({ moods, onDelete, onModify }) {
@@ -38,6 +46,9 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
     formatDateTime(moods.created_at)
   );
   const supabase = useSupabaseClient();
+ const theme = useTheme();
+ const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
 
   useEffect(() => {
     async function fetchCategories() {
@@ -104,20 +115,17 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
   };
 
   return (
-    <Grid item xs={6} md={6} lg={4} sx={{ mt: 2, mb: 2, m: "auto" }}>
+    <Grid item xs={12} md={4} sx={{ mb: 2, mt: 5 }}>
       <Card
         variant="outlined"
         sx={{
           mb: 2,
           border: 4,
           borderColor: getBorderColor(moods.rating),
-          minWidth: 200,
-          minHeight: 400,
-          maxHeight: 400,
-          maxWidth: 500,
+          height: 400,
         }}
       >
-        <CardContent>
+        <CardContent sx={{ height: 300 }}>
           <Typography variant="h5" component="h2" sx={{ mb: 1.5 }}>
             <Typography
               sx={{ textDecoration: "underline" }}
@@ -198,7 +206,7 @@ export default function ListsMoods({ moods, onDelete, onModify }) {
         </CardContent>
 
         {/* //create card actions for delete on the bottom of the card */}
-        <CardActions disableSpacing>
+        <CardActions sx={{ justifyContent: "flex-end", mt: 2 }}>
           <Button
             size="small"
             color="error"

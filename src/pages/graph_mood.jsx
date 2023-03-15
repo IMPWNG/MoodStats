@@ -38,14 +38,8 @@ export default function GraphMoodPage() {
   return (
     <Grid container spacing={3} direction="column" alignItems="center">
       <Grid item xs={12} sx={{ mt: 4, mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Mood List
-        </Typography>
-        <Link href="/">
-          <Button variant="contained">Back to Home</Button>
-        </Link>
+        <StatsMood moods={moods} />
       </Grid>
-      <StatsMood moods={moods} />
     </Grid>
   );
 }

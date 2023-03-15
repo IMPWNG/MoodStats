@@ -181,7 +181,7 @@ export default function Layout({ children, meta: pageMeta }) {
                             <ListItemIcon>
                               <CottageIcon fontSize="small" />
                             </ListItemIcon>
-                            Home
+                            Home - Add a mood
                           </MenuItem>
                         </Link>
                         <Link href="/list_mood">

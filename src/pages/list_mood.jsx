@@ -11,7 +11,25 @@ import {
   Select,
   MenuItem,
   InputLabel,
+  Card,
+  CardContent,
+  CardActions,
+  CardHeader,
+  CardMedia,
+  IconButton,
+  Avatar,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Box,
 } from "@mui/material";
+import FolderIcon from "@mui/icons-material/Folder";
+import FiberNewIcon from "@mui/icons-material/FiberNew";
+import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
+import NotInterestedIcon from "@mui/icons-material/NotInterested";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 
 export default function ListMoodPage() {
@@ -265,6 +283,14 @@ export default function ListMoodPage() {
     setMoods(sortedMoods);
   };
 
+  const buttonBackgroundColor = (selectedCategory) => {
+    if (selectedCategory === filterByCategory) {
+      return "bg-gray-200";
+    } else {
+      return "bg-gray-100";
+    }
+  };
+
   //save into other database
   // const handleClick = async () => {
   //   setStatus("loading");
@@ -325,134 +351,101 @@ export default function ListMoodPage() {
 
   return (
     <>
-      <Grid container spacing={3} direction="column" alignItems="center">
-        <Grid item xs={12} sx={{ mt: 4 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Mood List
-          </Typography>
-          <Link href="/">
-            <Button variant="contained">Back to Home</Button>
-          </Link>
-        </Grid>
-
-
+      <Grid
+        container
+        spacing={3}
+        direction="row"
+        alignItems="center"
+        sx={{ mt: 4, justifyContent: "center" }}
+      >
         <Grid
-          container
-          spacing={3}
-          direction="row"
-          alignItems="center"
-          sx={{ mt: 4, justifyContent: "center" }}
+          item
+          xs={12}
+          md={6}
+          sx={{
+            textAlign: "center",
+            justifyContent: "center",
+            alignItems: "center",
+            display: "flex",
+          }}
         >
-          {getMostUsedCategory(moods) ? (
-            <Grid item xs={12} sm={4}>
-              <Typography
-                variant="h4"
-                component="h1"
-                gutterBottom
-                sx={{ textAlign: "center" }}
-              >
-                Most used category
-              </Typography>
-              <Typography
-                variant="h4"
-                component="h1"
-                gutterBottom
-                sx={{ color: "green", textAlign: "center" }}
-              >
-                {getMostUsedCategory(moods)}
-              </Typography>
-            </Grid>
-          ) : (
-            "Loading..."
-          )}{" "}
-          {getLessUsedCategory(moods) ? (
-            <Grid item xs={12} sm={4}>
-              <Typography
-                variant="h4"
-                component="h1"
-                gutterBottom
-                sx={{ textAlign: "center" }}
-              >
-                Less used category
-              </Typography>
-              <Typography
-                variant="h4"
-                component="h1"
-                gutterBottom
-                sx={{ color: "red", textAlign: "center" }}
-              >
-                {getLessUsedCategory(moods)}
-              </Typography>
-            </Grid>
-          ) : (
-            "Loading..."
-          )}{" "}
-        </Grid>
-      
-        <Grid
-          container
-          spacing={3}
-          direction="row"
-          alignItems="center"
-          sx={{ mt: 4, justifyContent: "center" }}
-        >
-          {getAverageRating(moods) ? (
-            <Grid item xs={12} sm={4}>
-              <Typography
-                variant="h4"
-                component="h1"
-                gutterBottom
-                sx={{ textAlign: "center" }}
-              >
-                Average rating
-              </Typography>
-              <Typography
-                variant="h4"
-                component="h1"
-                gutterBottom
+          <Card sx={{ width: 300, height: 400 }}>
+            {getMostUsedCategory(moods) ? (
+              <CardHeader
+                title="Most used category"
+                subheader={getMostUsedCategory(moods)}
                 sx={{
-                  mb: 2,
                   textAlign: "center",
-                  color: ratingColor,
+                  "& .MuiCardHeader-subheader": {
+                    color: "green",
+                    fontSize: "1.5rem",
+                  },
                 }}
-              >
-                {averageRating.toFixed(2)} {getMostUsedEmoji(moods)}
-              </Typography>
-            </Grid>
-          ) : (
-            "Loading..."
-          )}{" "}
-    
-          {countMoodsYear(moods) ? (
-            <Grid item xs={12} sm={4}>
-              <Typography
-                variant="h4"
-                component="h1"
-                gutterBottom
-                sx={{ textAlign: "center" }}
-              >
-                Total Entry this years
-              </Typography>
-              <Typography
-                variant="h4"
-                component="h1"
-                gutterBottom
-                sx={{ textAlign: "center" }}
-              >
-                {countMoodsYear(moods)}
-              </Typography>
-            </Grid>
-          ) : (
-            "Loading..."
-          )}{" "}
-         
+              />
+            ) : (
+              "Loading..."
+            )}{" "}
+            {getLessUsedCategory(moods) ? (
+              <CardHeader
+                title="Less used category"
+                subheader={getLessUsedCategory(moods)}
+                sx={{
+                  textAlign: "center",
+
+                  "& .MuiCardHeader-subheader": {
+                    color: "red",
+                    fontSize: "1.5rem",
+                  },
+                }}
+              />
+            ) : (
+              "Loading..."
+            )}{" "}
+            <CardHeader
+              title="Average Rating"
+              subheader={`${averageRating.toFixed(2)} ${getMostUsedEmoji(
+                moods
+              )}`}
+              sx={{
+                textAlign: "center",
+
+                "& .MuiCardHeader-subheader": {
+                  color: "blue",
+                  fontSize: "1.5rem",
+                },
+              }}
+            />
+            <CardHeader
+              title="Total entries this year"
+              subheader={countMoodsYear(moods)}
+              sx={{
+                textAlign: "center",
+
+                "& .MuiCardHeader-subheader": {
+                  color: "blue",
+                  fontSize: "1.5rem",
+                },
+              }}
+            />
+          </Card>
         </Grid>
 
-        <Grid item xs={12} sx={{ mt: 4 }}>
+        <Grid
+          item
+          xs={12}
+          md={6}
+          sx={{
+            textAlign: "center",
+            justifyContent: "center",
+            alignItems: "center",
+            display: "flex",
+          }}
+        >
           <FormGroup
             row
             sx={{
               justifyContent: "center",
+              alignItems: "center",
             }}
           >
             <FormControlLabel
@@ -461,11 +454,24 @@ export default function ListMoodPage() {
                   onClick={handleFilterByDate}
                   disabled={loading || error}
                   variant="contained"
-                  sx={{ width: "100%" }}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    width: 200,
+                    ml: 2,
+                  }}
                 >
-                  {filterByDate
-                    ? "Click to Oldest First"
-                    : "Click to Recent First"}
+                  {filterByDate ? (
+                    <>
+                      Oldest First
+                      <FolderIcon sx={{ ml: 1 }} />
+                    </>
+                  ) : (
+                    <>
+                      Recent First
+                      <FiberNewIcon sx={{ ml: 1 }} />
+                    </>
+                  )}
                 </Button>
               }
               sx={{ mb: 2 }}
@@ -477,11 +483,24 @@ export default function ListMoodPage() {
                   onClick={handleFilterByRate}
                   disabled={loading || error}
                   variant="contained"
-                  sx={{ width: "100%" }}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    width: 200,
+                    ml: 2,
+                  }}
                 >
-                  {filterByRate
-                    ? "Click to Lowest First"
-                    : "Click to Highest First"}
+                  {filterByRate ? (
+                    <>
+                      Lowest First
+                      <NotInterestedIcon sx={{ ml: 1 }} />
+                    </>
+                  ) : (
+                    <>
+                      Highest First
+                      <MilitaryTechIcon sx={{ ml: 1 }} />
+                    </>
+                  )}
                 </Button>
               }
               sx={{ mb: 2 }}
@@ -524,55 +543,48 @@ export default function ListMoodPage() {
           </FormGroup>
         </Grid>
       </Grid>
-      <Grid
-        container
-        rowSpacing={3}
-        columnSpacing={{ xs: 4, sm: 2, md: 3 }}
-        spacing={3}
-        sx={{ mt: 4 }}
-      >
-        {filterByDate &&
-          moods
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            .map((moods) => (
-              <ListsMood
-                key={moods.id}
-                moods={moods}
-                onDelete={() => deleteMood(moods.id)}
-                onModify={() => modifyMood()}
-              />
-            ))}
-        {!filterByDate &&
-          moods.map((moods) => (
-            <ListsMood
-              key={moods.id}
-              moods={moods}
-              onDelete={() => deleteMood(moods.id)}
-              onModify={() => modifyMood()}
-            />
-          ))}
-        {filterByRate &&
-          moods.map((moods) => (
-            <ListsMood
-              key={moods.id}
-              moods={moods}
-              onDelete={() => deleteMood(moods.id)}
-              onModify={() => modifyMood()}
-            />
-          ))}
-        {!filterByRate &&
-          moods
-            .sort((a, b) => b.rating - a.rating)
-            .map((moods) => (
-              <ListsMood
-                key={moods.id}
-                moods={moods}
-                onDelete={() => deleteMood(moods.id)}
-                onModify={() => modifyMood()}
-              />
-            ))}
+      <Box sx={{ width: '100%' }}>
+      <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+        {filterByDate
+          ? moods
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              .map((moods) => (
+         
+                  <ListsMood
+                    moods={moods}
+                    onDelete={() => deleteMood(moods.id)}
+                    onModify={() => modifyMood()}
+                  />
+        
+              ))
+          : !filterByRate
+          ? moods.map((moods) => (
+             
+                <ListsMood
+                  moods={moods}
+                  onDelete={() => deleteMood(moods.id)}
+                  onModify={() => modifyMood()}
+                />
+ 
+            ))
+          : moods
+              .sort((a, b) => b.rating - a.rating)
+              .map((moods) => (
 
-        {/* {filterByCategory &&
+                  <ListsMood
+                    moods={moods}
+                    onDelete={() => deleteMood(moods.id)}
+                    onModify={() => modifyMood()}
+                  />
+          
+              ))}
+      </Grid>
+    </Box>
+    </>
+  );
+}
+      {
+        /* {filterByCategory &&
       moods
         .filter((moods) => moods.category === categories)
         .map((moods) => (
@@ -584,8 +596,5 @@ export default function ListMoodPage() {
               onModify={() => modifyMood()}
             />
           </Grid>
-        ))} */}
-      </Grid>
-    </>
-  );
-}
+        ))} */
+      }
