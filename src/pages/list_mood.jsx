@@ -34,7 +34,6 @@ export default function ListMoodPage() {
           .from("stats")
           .select("*")
           .eq("user_id", user?.id || "");
-
         if (error) throw error;
         const uniqueCategories = new Set(moods.map((mood) => mood.category));
         setCategories([...uniqueCategories].filter(Boolean));
@@ -325,240 +324,268 @@ export default function ListMoodPage() {
   const averageRating = getAverageRating(moods);
 
   return (
-    <Grid container spacing={3} direction="column" alignItems="center">
-      <Grid item xs={12} sx={{ mt: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Mood List
-        </Typography>
-        <Link href="/">
-          <Button variant="contained">Back to Home</Button>
-        </Link>
-      </Grid>
-      <Grid item xs={12}>
-        <Button variant="contained" onClick={() => handleClick(moods)}>
-          Save descriptions to description database
-        </Button>
-      </Grid>
+    <>
+      <Grid container spacing={3} direction="column" alignItems="center">
+        <Grid item xs={12} sx={{ mt: 4 }}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            Mood List
+          </Typography>
+          <Link href="/">
+            <Button variant="contained">Back to Home</Button>
+          </Link>
+        </Grid>
 
-      <Grid item xs={12}>
-        {getMostUsedCategory(moods) ? (
-          <>
-            <Typography
-              variant="h4"
-              component="h1"
-              gutterBottom
-              sx={{ textAlign: "center" }}
-            >
-              Most used category
-            </Typography>
-            <Typography
-              variant="h4"
-              component="h1"
-              gutterBottom
-              sx={{ color: "green", textAlign: "center" }}
-            >
-              {getMostUsedCategory(moods)}
-            </Typography>
-          </>
-        ) : (
-          "Loading..."
-        )}{" "}
-        <br />
-        {getLessUsedCategory(moods) ? (
-          <>
-            <Typography
-              variant="h4"
-              component="h1"
-              gutterBottom
-              sx={{ textAlign: "center" }}
-            >
-              Less used category
-            </Typography>
-            <Typography
-              variant="h4"
-              component="h1"
-              gutterBottom
-              sx={{ color: "red", textAlign: "center" }}
-            >
-              {getLessUsedCategory(moods)}
-            </Typography>
-          </>
-        ) : (
-          "Loading..."
-        )}{" "}
-        <br />
-        <br />
-        {getAverageRating(moods) ? (
-          <>
-            <Typography
-              variant="h4"
-              component="h1"
-              gutterBottom
-              sx={{ textAlign: "center" }}
-            >
-              Average rating
-            </Typography>
-            <Typography
-              variant="h4"
-              component="h1"
-              gutterBottom
-              sx={{
-                mb: 2,
-                textAlign: "center",
-                color: ratingColor,
-              }}
-            >
-              {averageRating.toFixed(2)} {getMostUsedEmoji(moods)}
-            </Typography>
-          </>
-        ) : (
-          "Loading..."
-        )}{" "}
-        <br />
-        {countMoodsYear(moods) ? (
-          <>
-            <Typography
-              variant="h4"
-              component="h1"
-              gutterBottom
-              sx={{ textAlign: "center" }}
-            >
-              Total Entry this years
-            </Typography>
-            <Typography
-              variant="h4"
-              component="h1"
-              gutterBottom
-              sx={{ textAlign: "center" }}
-            >
-              {countMoodsYear(moods)}
-            </Typography>
-          </>
-        ) : (
-          "Loading..."
-        )}{" "}
-        <br />
-      </Grid>
 
-      <Grid item xs={12} sx={{ mt: 4 }}>
-        <FormGroup
-          row
-          sx={{
-            justifyContent: "center",
-          }}
+        <Grid
+          container
+          spacing={3}
+          direction="row"
+          alignItems="center"
+          sx={{ mt: 4, justifyContent: "center" }}
         >
-          <FormControlLabel
-            control={
-              <Button
-                onClick={handleFilterByDate}
-                disabled={loading || error}
-                variant="contained"
-                sx={{ width: "100%" }}
+          {getMostUsedCategory(moods) ? (
+            <Grid item xs={12} sm={4}>
+              <Typography
+                variant="h4"
+                component="h1"
+                gutterBottom
+                sx={{ textAlign: "center" }}
               >
-                {filterByDate
-                  ? "Click to Oldest First"
-                  : "Click to Recent First"}
-              </Button>
-            }
-            sx={{ mb: 2 }}
-          />
-          <Typography variant="h4" component="h1" gutterBottom>
-            Filter by Date
-          </Typography>
-          <FormControlLabel
-            control={
-              <Button
-                onClick={handleFilterByRate}
-                disabled={loading || error}
-                variant="contained"
-                sx={{ width: "100%" }}
+                Most used category
+              </Typography>
+              <Typography
+                variant="h4"
+                component="h1"
+                gutterBottom
+                sx={{ color: "green", textAlign: "center" }}
               >
-                {filterByRate
-                  ? "Click to Lowest First"
-                  : "Click to Highest First"}
-              </Button>
-            }
-            sx={{ mb: 2 }}
-          />
-          <Typography variant="h4" component="h1" gutterBottom>
-            Filter by Rating
-          </Typography>
-          {/* <FormControlLabel
-            control={
-              <>
-                <Select
-                  value={categories}
-                  onChange={handleFilterByCategory}
+                {getMostUsedCategory(moods)}
+              </Typography>
+            </Grid>
+          ) : (
+            "Loading..."
+          )}{" "}
+          {getLessUsedCategory(moods) ? (
+            <Grid item xs={12} sm={4}>
+              <Typography
+                variant="h4"
+                component="h1"
+                gutterBottom
+                sx={{ textAlign: "center" }}
+              >
+                Less used category
+              </Typography>
+              <Typography
+                variant="h4"
+                component="h1"
+                gutterBottom
+                sx={{ color: "red", textAlign: "center" }}
+              >
+                {getLessUsedCategory(moods)}
+              </Typography>
+            </Grid>
+          ) : (
+            "Loading..."
+          )}{" "}
+        </Grid>
+      
+        <Grid
+          container
+          spacing={3}
+          direction="row"
+          alignItems="center"
+          sx={{ mt: 4, justifyContent: "center" }}
+        >
+          {getAverageRating(moods) ? (
+            <Grid item xs={12} sm={4}>
+              <Typography
+                variant="h4"
+                component="h1"
+                gutterBottom
+                sx={{ textAlign: "center" }}
+              >
+                Average rating
+              </Typography>
+              <Typography
+                variant="h4"
+                component="h1"
+                gutterBottom
+                sx={{
+                  mb: 2,
+                  textAlign: "center",
+                  color: ratingColor,
+                }}
+              >
+                {averageRating.toFixed(2)} {getMostUsedEmoji(moods)}
+              </Typography>
+            </Grid>
+          ) : (
+            "Loading..."
+          )}{" "}
+    
+          {countMoodsYear(moods) ? (
+            <Grid item xs={12} sm={4}>
+              <Typography
+                variant="h4"
+                component="h1"
+                gutterBottom
+                sx={{ textAlign: "center" }}
+              >
+                Total Entry this years
+              </Typography>
+              <Typography
+                variant="h4"
+                component="h1"
+                gutterBottom
+                sx={{ textAlign: "center" }}
+              >
+                {countMoodsYear(moods)}
+              </Typography>
+            </Grid>
+          ) : (
+            "Loading..."
+          )}{" "}
+         
+        </Grid>
+
+        <Grid item xs={12} sx={{ mt: 4 }}>
+          <FormGroup
+            row
+            sx={{
+              justifyContent: "center",
+            }}
+          >
+            <FormControlLabel
+              control={
+                <Button
+                  onClick={handleFilterByDate}
                   disabled={loading || error}
-                  sx={{
-                    color: "white",
-                    width: 200,
-                    border: 1,
-                    borderColor: "grey.500",
-                    borderRadius: 4,
-                    mr: 2,
-                    input: {
-                      color: "white",
-                    },
-                    InputLabelProps: {
-                      color: "white",
-                    },
-
-                  }}
+                  variant="contained"
+                  sx={{ width: "100%" }}
                 >
-                 {categories.map((category) => (
-                    <MenuItem value={category}>{category}</MenuItem>
-                  ))}
-                  
-                </Select>
-              </>
-            }
-          />
-          <Typography variant="h4" component="h1" gutterBottom>
-            Filter by Category
-          </Typography> */}
-        </FormGroup>
-      </Grid>
+                  {filterByDate
+                    ? "Click to Oldest First"
+                    : "Click to Recent First"}
+                </Button>
+              }
+              sx={{ mb: 2 }}
+            />
 
-      <Grid item xs={12} sx={{ mt: 4 }}>
+            <FormControlLabel
+              control={
+                <Button
+                  onClick={handleFilterByRate}
+                  disabled={loading || error}
+                  variant="contained"
+                  sx={{ width: "100%" }}
+                >
+                  {filterByRate
+                    ? "Click to Lowest First"
+                    : "Click to Highest First"}
+                </Button>
+              }
+              sx={{ mb: 2 }}
+            />
+
+            {/* <FormControlLabel
+      control={
+        <>
+          <Select
+            value={categories}
+            onChange={handleFilterByCategory}
+            disabled={loading || error}
+            sx={{
+              color: "white",
+              width: 200,
+              border: 1,
+              borderColor: "grey.500",
+              borderRadius: 4,
+              mr: 2,
+              input: {
+                color: "white",
+              },
+              InputLabelProps: {
+                color: "white",
+              },
+
+            }}
+          >
+           {categories.map((category) => (
+              <MenuItem value={category}>{category}</MenuItem>
+            ))}
+            
+          </Select>
+        </>
+      }
+    />
+    <Typography variant="h4" component="h1" gutterBottom>
+      Filter by Category
+    </Typography> */}
+          </FormGroup>
+        </Grid>
+      </Grid>
+      <Grid
+        container
+        rowSpacing={3}
+        columnSpacing={{ xs: 4, sm: 2, md: 3 }}
+        spacing={3}
+        sx={{ mt: 4 }}
+      >
         {filterByDate &&
           moods
             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
             .map((moods) => (
-              <Grid item xs={12} sx={{ mt: 4, m: 4 }}>
-                <ListsMood
-                  key={moods.id}
-                  moods={moods}
-                  onDelete={() => deleteMood(moods.id)}
-                  onModify={() => modifyMood()}
-                />
-              </Grid>
-            ))}
-        {!filterByDate &&
-          moods.map((moods) => (
-            <Grid item xs={12} sx={{ mt: 4, m: 4 }}>
               <ListsMood
                 key={moods.id}
                 moods={moods}
                 onDelete={() => deleteMood(moods.id)}
                 onModify={() => modifyMood()}
               />
-            </Grid>
+            ))}
+        {!filterByDate &&
+          moods.map((moods) => (
+            <ListsMood
+              key={moods.id}
+              moods={moods}
+              onDelete={() => deleteMood(moods.id)}
+              onModify={() => modifyMood()}
+            />
           ))}
-        {/* {filterByCategory &&
+        {filterByRate &&
+          moods.map((moods) => (
+            <ListsMood
+              key={moods.id}
+              moods={moods}
+              onDelete={() => deleteMood(moods.id)}
+              onModify={() => modifyMood()}
+            />
+          ))}
+        {!filterByRate &&
           moods
-            .filter((moods) => moods.category === categories)
+            .sort((a, b) => b.rating - a.rating)
             .map((moods) => (
-              <Grid item xs={12} sx={{ mt: 4, m: 4 }}>
-                <ListsMood
-                  key={moods.id}
-                  moods={moods}
-                  onDelete={() => deleteMood(moods.id)}
-                  onModify={() => modifyMood()}
-                />
-              </Grid>
-            ))} */}
+              <ListsMood
+                key={moods.id}
+                moods={moods}
+                onDelete={() => deleteMood(moods.id)}
+                onModify={() => modifyMood()}
+              />
+            ))}
+
+        {/* {filterByCategory &&
+      moods
+        .filter((moods) => moods.category === categories)
+        .map((moods) => (
+          <Grid item xs={12} sx={{ mt: 4, m: 4 }}>
+            <ListsMood
+              key={moods.id}
+              moods={moods}
+              onDelete={() => deleteMood(moods.id)}
+              onModify={() => modifyMood()}
+            />
+          </Grid>
+        ))} */}
       </Grid>
-    </Grid>
+    </>
   );
 }

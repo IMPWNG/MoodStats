@@ -1,5 +1,3 @@
-import styles from "@/styles/Home.module.css";
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import {
   Grid,
@@ -16,10 +14,8 @@ import {
   Alert,
 } from "@mui/material";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
+import CircularProgress from "@mui/material/CircularProgress";
 
-import { Inter } from "@next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
 const steps = ["💬", "📁", "💯"];
 
 export default function GeneralForm() {
@@ -32,6 +28,7 @@ export default function GeneralForm() {
   const [alert, setAlert] = useState(false);
   const [createCategory, setCreateCategory] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getCategories = async () => {
@@ -62,6 +59,9 @@ export default function GeneralForm() {
 
   const handleReset = () => {
     setActiveStep(0);
+    setNewDescriptionText("");
+    setCategoryText("");
+    setClicked(null);
   };
 
   const handleAddMood = async () => {
@@ -69,17 +69,17 @@ export default function GeneralForm() {
     const category = categoryText.trim();
     if (description.length === 0) {
       setActiveStep(0);
-      setAlert(true);
+
       return;
     }
     if (category.length === 0) {
       setActiveStep(1);
-      setAlert(true);
+
       return;
     }
     if (!clicked || clicked < 1 || clicked > 10) {
       setActiveStep(2);
-      setAlert(true);
+
       return;
     }
 
@@ -92,12 +92,17 @@ export default function GeneralForm() {
           category,
         },
       ]);
-      setAlert(true);
       setIsAdded(true);
       setNewDescriptionText("");
       setCategoryText("");
       setClicked(null);
       setActiveStep(0);
+      setLoading(true);
+
+      setAlert(true);
+      setTimeout(() => {
+        setAlert(false);
+      }, 3000);
 
       if (error) throw error;
     } catch (error) {
@@ -162,7 +167,6 @@ export default function GeneralForm() {
     }
   };
 
-
   const getUniqueCategories = (categories) => {
     const uniqueCategories = [];
     categories.forEach((category) => {
@@ -174,9 +178,14 @@ export default function GeneralForm() {
   };
 
   return (
-    <main className={styles.main}>
-      <div className={styles.center}>
-        <Box sx={{ width: "100%" }}>
+    <Grid container spacing={2}>
+      <Grid
+        item
+        xs={12}
+        md={12}
+        sx={{ textAlign: "center", mt: 4, justifyContent: "center" }}
+      >
+        <Box sx={{ width: "100%", minWidth: 400, p: 10 }}>
           <Stepper activeStep={activeStep}>
             {steps.map((label, index) => {
               const stepProps = {};
@@ -189,10 +198,14 @@ export default function GeneralForm() {
               );
             })}
           </Stepper>
+
           {alert && (
             <Alert
               sx={{ mt: 4, mb: 4 }}
-              onClose={() => setInterval(setAlert(false), 2000)}
+              severity="success"
+              onClose={() => {
+                setAlert(true);
+              }}
             >
               Mood added!
             </Alert>
@@ -200,9 +213,71 @@ export default function GeneralForm() {
 
           {activeStep === steps.length ? (
             <>
-              <Typography sx={{ mt: 2, mb: 1 }}>
-                All steps completed - you can submit your mood!
-              </Typography>
+              {/* //if description, category and rating are not empty, then show all steps completed */}
+              {newDescriptionText.length > 0 &&
+              categoryText.length > 0 &&
+              clicked != null ? (
+                <Typography sx={{ mt: 2, mb: 1 }}>
+                  All steps completed - you can submit your mood!
+                </Typography>
+              ) : (
+                <Typography sx={{ mt: 2, mb: 1 }}>
+                  You're missing some information!
+                  {/* //get the missing information from the user */}
+                  {newDescriptionText.length === 0 && (
+                    <Typography sx={{ mt: 2, mb: 1 }}>
+                      Please add a{" "}
+                      <a
+                        style={{
+                          color: "blue",
+                          cursor: "pointer",
+                          fontSize: 16,
+                          fontWeight: "bold",
+                          textDecoration: "underline",
+                        }}
+                        onClick={() => setActiveStep(0)}
+                      >
+                        description
+                      </a>
+                    </Typography>
+                  )}
+                  {categoryText.length === 0 && (
+                    <Typography sx={{ mt: 2, mb: 1 }}>
+                      Please add a{" "}
+                      <a
+                        style={{
+                          color: "blue",
+                          cursor: "pointer",
+                          fontSize: 16,
+                          fontWeight: "bold",
+                          textDecoration: "underline",
+                        }}
+                        onClick={() => setActiveStep(1)}
+                      >
+                        category
+                      </a>
+                    </Typography>
+                  )}
+                  {clicked === null && (
+                    <Typography sx={{ mt: 2, mb: 1 }}>
+                      Please add a{" "}
+                      <a
+                        style={{
+                          color: "blue",
+                          cursor: "pointer",
+                          fontSize: 16,
+                          fontWeight: "bold",
+                          textDecoration: "underline",
+                        }}
+                        onClick={() => setActiveStep(2)}
+                      >
+                        rating
+                      </a>
+                    </Typography>
+                  )}
+                </Typography>
+              )}
+
               <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
                 <Card sx={{ display: "flex", width: "100%" }}>
                   <Box sx={{ display: "flex", flexDirection: "column" }}>
@@ -227,13 +302,46 @@ export default function GeneralForm() {
               </Box>
               <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
                 <Box sx={{ flex: "1 1 auto" }} />
-                <Button onClick={handleReset} sx={{ ml: 1 }}>
+                <Button
+                  onClick={handleReset}
+                  sx={{
+                    ml: 1,
+                    backgroundColor: "red",
+                    color: "white",
+                    "&:hover": { backgroundColor: "red" },
+                  }}
+                  variant="contained"
+                >
                   Reset
                 </Button>
-                <Button onClick={handleBack} sx={{ ml: 1 }}>
+                <Button
+                  onClick={handleBack}
+                  sx={{
+                    ml: 1,
+                    backgroundColor: "red",
+                    color: "white",
+                    "&:hover": { backgroundColor: "red" },
+                  }}
+                  variant="contained"
+                >
                   Back
                 </Button>
-                <Button onClick={handleAddMood}>Submit</Button>
+                {newDescriptionText.length > 0 &&
+                  categoryText.length > 0 &&
+                  clicked !== null && (
+                    <Button
+                      onClick={handleAddMood}
+                      sx={{
+                        ml: 1,
+                        backgroundColor: "green",
+                        color: "white",
+                        "&:hover": { backgroundColor: "green" },
+                      }}
+                      variant="contained"
+                    >
+                      {loading ? "Submit" : <CircularProgress size={24} />}
+                    </Button>
+                  )}
               </Box>
             </>
           ) : (
@@ -248,12 +356,29 @@ export default function GeneralForm() {
                       id="description"
                       value={newDescriptionText}
                       label="Type your mood here..."
+                      multiline
+                      rows={6}
                       onChange={(e) => setNewDescriptionText(e.target.value)}
                       sx={{
                         width: "100%",
                         justifyContent: "center",
-                        input: { color: "white" },
-                        label: { color: "white" },
+                        "& .MuiOutlinedInput-root": {
+                          "& fieldset": {
+                            borderColor: "white",
+                          },
+                          "&:hover fieldset": {
+                            borderColor: "white",
+                          },
+                          "&.Mui-focused fieldset": {
+                            borderColor: "white",
+                          },
+                        },
+                        "& .MuiOutlinedInput-input": {
+                          color: "white",
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "white",
+                        },
                       }}
                     />
                   </Grid>
@@ -266,66 +391,64 @@ export default function GeneralForm() {
                     <TextField
                       id="category"
                       value={categoryText}
+                      label="Describe your mood..."
+                      multiline
+                      rows={3}
                       sx={{
                         justifyContent: "center",
                         input: { color: "white" },
                         label: { color: "white" },
                         textAlign: "center",
                         mb: 4,
+                        "& .MuiOutlinedInput-root": {
+                          "& fieldset": {
+                            borderColor: "white",
+                          },
+                          "&:hover fieldset": {
+                            borderColor: "white",
+                          },
+                          "&.Mui-focused fieldset": {
+                            borderColor: "white",
+                          },
+                        },
+                        "& .MuiOutlinedInput-input": {
+                          color: "white",
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "white",
+                        },
                       }}
+                      onChange={(e) => setCategoryText(e.target.value)}
                     />
 
-                    <Box sx={{ display: "flex", flexDirection: "row" }}>
-                      <Box sx={{ flex: "1 1 auto" }} />
-                      {getUniqueCategories(categories).map((category) => {
-                        return (
-                          <Button
-                            onClick={() => setCategoryText(category)}
-                            sx={{ ml: 1 }}
-                          >
-                            {category}
-                          </Button>
-                        );
-                      })}
-
-                      <Button
-                        onClick={() => setCategoryText("Work")}
-                        sx={{ ml: 1 }}
-                      >
-                        Work
-                      </Button>
-                      <Button
-                        onClick={() => setCategoryText("Personal")}
-                        sx={{ ml: 1 }}
-                      >
-                        Personal
-                      </Button>
-                      <Button
-                        onClick={() => setCategoryText("Family")}
-                        sx={{ ml: 1 }}
-                      >
-                        Family
-                      </Button>
-                      <Button
-                        onClick={() => setCategoryText("Friends")}
-                        sx={{ ml: 1 }}
-                      >
-                        Friends
-                      </Button>
-                      <Button
-                        onClick={() => setCategoryText("Health")}
-                        sx={{ ml: 1 }}
-                      >
-                        Health
-                      </Button>
-                      <Button
-                        onClick={() => setCategoryText("Hobbies")}
-                        sx={{ ml: 1 }}
-                      >
-                        Hobbies
-                      </Button>
-                      <Box sx={{ flex: "1 1 auto" }} />
-                    </Box>
+                    <Grid container spacing={2} sx={{ mt: 2 }}>
+                      <Grid item xs={12} sm={12}>
+                        {getUniqueCategories(categories).map((category) => {
+                          return (
+                            <Button
+                              onClick={() => setCategoryText(category)}
+                              sx={{ ml: 1 }}
+                            >
+                              {category}
+                            </Button>
+                          );
+                        })}
+                      </Grid>
+                      <Grid item xs={12} sm={12}>
+                        <Button
+                          onClick={() => setCategoryText("")}
+                          sx={{
+                            ml: 1,
+                            backgroundColor: "red",
+                            color: "white",
+                            ":hover": { backgroundColor: "red" },
+                            mt: 2,
+                          }}
+                        >
+                          Clear
+                        </Button>
+                      </Grid>
+                    </Grid>
 
                     <Grid
                       container
@@ -344,175 +467,340 @@ export default function GeneralForm() {
                       spacing={2}
                       sx={{ mt: 4, justifyContent: "space-evenly" }}
                     >
-                      <Button
+                      {/* //change the color of the button if it is clicked */}
+                      {clicked === 1 ? (
+                        <Button
+                          className={getButtonClass(1)}
+                          onClick={() => handleClickedButton(1)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "green" },
+                            m: 1,
+                            backgroundColor: "green",
+                          }}
+                          variant="contained"
+                        >
+                          1
+                        </Button>
+                      ) : (
+                        <Button
+                          className={getButtonClass(1)}
+                          onClick={() => handleClickedButton(1)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "white" },
+                            m: 1,
+                          }}
+                        >
+                          1
+                        </Button>
+                      )}
+
+                      {/* <Button
                         className={getButtonClass(1)}
                         onClick={() => handleClickedButton(1)}
-                        sx={{
-                          color: "white",
-                          ":hover": { color: "green" },
-                          m: 1,
-                        }}
                       >
                         1
-                      </Button>
-                      <Button
-                        className={getButtonClass(2)}
-                        onClick={() => handleClickedButton(2)}
-                        sx={{
-                          color: "white",
-                          ":hover": { color: "green" },
-                          m: 1,
-                        }}
-                      >
-                        2
-                      </Button>
-                      <Button
-                        className={getButtonClass(3)}
-                        onClick={() => handleClickedButton(3)}
-                        sx={{
-                          color: "white",
-                          ":hover": { color: "green" },
-                          m: 1,
-                        }}
-                      >
-                        3
-                      </Button>
-                      <Button
-                        className={getButtonClass(4)}
-                        onClick={() => handleClickedButton(4)}
-                        sx={{
-                          color: "white",
-                          ":hover": { color: "green" },
-                          m: 1,
-                        }}
-                      >
-                        4
-                      </Button>
-                      <Button
-                        className={getButtonClass(5)}
-                        onClick={() => handleClickedButton(5)}
-                        sx={{
-                          color: "white",
-                          ":hover": { color: "green" },
-                          m: 1,
-                        }}
-                      >
-                        5
-                      </Button>
-                      <Button
-                        className={getButtonClass(6)}
-                        onClick={() => handleClickedButton(6)}
-                        sx={{
-                          color: "white",
-                          ":hover": { color: "green" },
-                          m: 1,
-                        }}
-                      >
-                        6
-                      </Button>
-                      <Button
-                        className={getButtonClass(7)}
-                        onClick={() => handleClickedButton(7)}
-                        sx={{
-                          color: "white",
-                          ":hover": { color: "green" },
-                          m: 1,
-                        }}
-                      >
-                        7
-                      </Button>
-                      <Button
-                        className={getButtonClass(8)}
-                        onClick={() => handleClickedButton(8)}
-                        sx={{
-                          color: "white",
-                          ":hover": { color: "green" },
-                          m: 1,
-                        }}
-                      >
-                        8
-                      </Button>
-                      <Button
-                        className={getButtonClass(9)}
-                        onClick={() => handleClickedButton(9)}
-                        sx={{
-                          color: "white",
-                          ":hover": { color: "green" },
-                          m: 1,
-                        }}
-                      >
-                        9
-                      </Button>
-                      <Button
-                        className={getButtonClass(10)}
-                        onClick={() => handleClickedButton(10)}
-                        sx={{
-                          color: "white",
-                          ":hover": { color: "green" },
-                          m: 1,
-                        }}
-                      >
-                        10
-                      </Button>
+                      </Button> */}
+                      {clicked === 2 ? (
+                        <Button
+                          className={getButtonClass(1)}
+                          onClick={() => handleClickedButton(1)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "green" },
+                            m: 1,
+                            backgroundColor: "green",
+                          }}
+                          variant="contained"
+                        >
+                          2
+                        </Button>
+                      ) : (
+                        <Button
+                          className={getButtonClass(2)}
+                          onClick={() => handleClickedButton(2)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "white" },
+                            m: 1,
+                          }}
+                        >
+                          2
+                        </Button>
+                      )}
+                      {clicked === 3 ? (
+                        <Button
+                          className={getButtonClass(3)}
+                          onClick={() => handleClickedButton(3)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "green" },
+                            m: 1,
+                            backgroundColor: "green",
+                          }}
+                          variant="contained"
+                        >
+                          3
+                        </Button>
+                      ) : (
+                        <Button
+                          className={getButtonClass(3)}
+                          onClick={() => handleClickedButton(3)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "white" },
+                            m: 1,
+                          }}
+                        >
+                          3
+                        </Button>
+                      )}
+                      {clicked === 4 ? (
+                        <Button
+                          className={getButtonClass(4)}
+                          onClick={() => handleClickedButton(4)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "green" },
+                            m: 1,
+                            backgroundColor: "green",
+                          }}
+                          variant="contained"
+                        >
+                          4
+                        </Button>
+                      ) : (
+                        <Button
+                          className={getButtonClass(4)}
+                          onClick={() => handleClickedButton(4)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "white" },
+                            m: 1,
+                          }}
+                        >
+                          4
+                        </Button>
+                      )}
+                      {clicked === 5 ? (
+                        <Button
+                          className={getButtonClass(5)}
+                          onClick={() => handleClickedButton(5)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "green" },
+                            m: 1,
+                            backgroundColor: "green",
+                          }}
+                          variant="contained"
+                        >
+                          5
+                        </Button>
+                      ) : (
+                        <Button
+                          className={getButtonClass(5)}
+                          onClick={() => handleClickedButton(5)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "white" },
+                            m: 1,
+                          }}
+                        >
+                          5
+                        </Button>
+                      )}
+                      {clicked === 6 ? (
+                        <Button
+                          className={getButtonClass(6)}
+                          onClick={() => handleClickedButton(6)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "green" },
+                            m: 1,
+                            backgroundColor: "green",
+                          }}
+                          variant="contained"
+                        >
+                          6
+                        </Button>
+                      ) : (
+                        <Button
+                          className={getButtonClass(6)}
+                          onClick={() => handleClickedButton(6)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "white" },
+                            m: 1,
+                          }}
+                        >
+                          6
+                        </Button>
+                      )}
+                      {clicked === 7 ? (
+                        <Button
+                          className={getButtonClass(7)}
+                          onClick={() => handleClickedButton(7)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "green" },
+                            m: 1,
+                            backgroundColor: "green",
+                          }}
+                          variant="contained"
+                        >
+                          7
+                        </Button>
+                      ) : (
+                        <Button
+                          className={getButtonClass(7)}
+                          onClick={() => handleClickedButton(7)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "white" },
+                            m: 1,
+                          }}
+                        >
+                          7
+                        </Button>
+                      )}
+                      {clicked === 8 ? (
+                        <Button
+                          className={getButtonClass(8)}
+                          onClick={() => handleClickedButton(8)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "green" },
+                            m: 1,
+                            backgroundColor: "green",
+                          }}
+                          variant="contained"
+                        >
+                          8
+                        </Button>
+                      ) : (
+                        <Button
+                          className={getButtonClass(8)}
+                          onClick={() => handleClickedButton(8)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "white" },
+                            m: 1,
+                          }}
+                        >
+                          8
+                        </Button>
+                      )}
+                      {clicked === 9 ? (
+                        <Button
+                          className={getButtonClass(9)}
+                          onClick={() => handleClickedButton(9)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "green" },
+                            m: 1,
+                            backgroundColor: "green",
+                          }}
+                          variant="contained"
+                        >
+                          9
+                        </Button>
+                      ) : (
+                        <Button
+                          className={getButtonClass(9)}
+                          onClick={() => handleClickedButton(9)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "white" },
+                            m: 1,
+                          }}
+                        >
+                          9
+                        </Button>
+                      )}
+                      {clicked === 10 ? (
+                        <Button
+                          className={getButtonClass(10)}
+                          onClick={() => handleClickedButton(10)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "green" },
+                            m: 1,
+                            backgroundColor: "green",
+                          }}
+                          variant="contained"
+                        >
+                          10
+                        </Button>
+                      ) : (
+                        <Button
+                          className={getButtonClass(10)}
+                          onClick={() => handleClickedButton(10)}
+                          sx={{
+                            color: "white",
+                            ":hover": { color: "white" },
+                            m: 1,
+                          }}
+                        >
+                          10
+                        </Button>
+                      )}
                     </Grid>
                   </Grid>
                 )}
               </Grid>
-
-              <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-                <Button
-                  color="inherit"
-                  disabled={activeStep === 0}
-                  onClick={handleBack}
-                  sx={{ mr: 1 }}
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                sx={{
+                  mt: 2,
+                  mb: 2,
+                  textAlign: "center",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    pt: 2,
+                  }}
                 >
-                  Back
-                </Button>
-                <Box sx={{ flex: "1 1 auto" }} />
+                  {activeStep !== 0 && (
+                    <Button
+                      onClick={handleBack}
+                      sx={{
+                        ml: 1,
+                        backgroundColor: "red",
+                        color: "white",
+                        ":hover": { backgroundColor: "red" },
+                      }}
+                      variant="contained"
+                    >
+                      Back
+                    </Button>
+                  )}
+                  <Box sx={{ flex: "1 1 auto" }} />
 
-                <Button onClick={handleNext}>
-                  {activeStep === steps.length - 1 ? "See resume" : "Next"}
-                </Button>
-              </Box>
+                  <Button
+                    onClick={handleNext}
+                    sx={{
+                      ml: 1,
+                      backgroundColor: "green",
+                      ":hover": { backgroundColor: "green" },
+                    }}
+                    variant="contained"
+                  >
+                    {activeStep === steps.length - 1 ? "See resume" : "Next"}
+                  </Button>
+                </Box>
+              </Grid>
             </Grid>
           )}
         </Box>
-      </div>
-      <div className={styles.grid}>
-        <Link href="/list_mood" className={styles.card} passHref>
-          <h2 className={inter.className}>
-            View, Delete, Modify {"  "}
-            <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            View, Delete, Modify your mood from the list off all your created
-            moods
-          </p>
-        </Link>
-        <Link href="/graph_mood" className={styles.card} passHref>
-          <h2>
-            Graphs, stats, and more <span>-&gt;</span>
-          </h2>
-          <p>
-            See your data in a more visual way, and get more insights about your
-            mood
-          </p>
-        </Link>
-
-        <Link href="/resume_mood" className={styles.card} passHref>
-          <h2>
-            Resume <span>-&gt;</span>
-          </h2>
-          <p>Get the daily, weekly, monthly, and yearly resume of your moods</p>
-        </Link>
-
-        <Link href="/upgrades" className={styles.card} passHref>
-          <h2>
-            Next Step <span>-&gt;</span>
-          </h2>
-          <p>See the next features that will be added to the app</p>
-        </Link>
-      </div>
-    </main>
+      </Grid>
+    </Grid>
   );
 }
