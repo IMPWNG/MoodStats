@@ -55,7 +55,8 @@ export default function ListMoodPage() {
     }
   }, [user]);
 
-  const deleteMood = async (id) => {
+ const deleteMood = async (id) => {
+  if (id !== undefined && Number.isInteger(id)) {
     try {
       const { data, error } = await supabase
         .from("stats")
@@ -70,7 +71,11 @@ export default function ListMoodPage() {
     } catch (error) {
       console.log("error", error.message);
     }
-  };
+  } else {
+    console.log("ID is undefined or not a valid value.");
+  }
+};
+
 
   const modifyMood = async (id, rating, category, description) => {
     try {
@@ -108,26 +113,26 @@ export default function ListMoodPage() {
   const countMoodsYear = (moods) => {
     const currentYear = new Date(2023, 0, 1);
     const moodSinceYear = moods.filter(
-      (mood) => new Date(mood.created_at) > currentYear
+      (mood) => new Date(mood?.created_at) > currentYear
     );
     const count = moodSinceYear.length;
     return count;
   };
 
-  const countMoodsMonth = (moods) => {
-    const today = new Date();
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const filteredMoods = moods.filter(
-      (mood) => mood.createdAt >= startOfMonth
-    );
+  // const countMoodsMonth = (moods) => {
+  //   const today = new Date();
+  //   const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  //   const filteredMoods = moods.filter(
+  //     (mood) => mood.createdAt >= startOfMonth
+  //   );
 
-    return filteredMoods.length;
-  };
+  //   return filteredMoods.length;
+  // };
 
   const getMostUsedCategory = (moods) => {
     const categoryCounts = {};
     moods.forEach((moods) => {
-      const category = moods.category;
+      const category = moods?.category;
       if (category in categoryCounts) {
         categoryCounts[category] += 1;
       } else {
@@ -149,7 +154,7 @@ export default function ListMoodPage() {
   const getLessUsedCategory = (moods) => {
     const categoryCounts = {};
     moods.forEach((moods) => {
-      const category = moods.category;
+      const category = moods?.category;
       if (category in categoryCounts) {
         categoryCounts[category] += 1;
       } else {
@@ -183,7 +188,7 @@ export default function ListMoodPage() {
     };
 
     moods.forEach((moods) => {
-      const rating = moods.rating;
+      const rating = moods?.rating;
       ratingCounts[rating] += 1;
     });
 
@@ -209,86 +214,86 @@ export default function ListMoodPage() {
   };
 
   //create a function to change color of the rating based on the value of the rating
-  const getRatingColor = (moods) => {
-    const ratings = moods.map((mood) => parseFloat(mood.rating));
-    const averageRating =
-      ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length;
+  // const getRatingColor = (moods) => {
+  //   const ratings = moods.map((mood) => parseFloat(mood?.rating));
+  //   const averageRating =
+  //     ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length;
 
-    if (averageRating >= 1 && averageRating <= 2) {
-      return "red";
-    } else if (averageRating >= 3 && averageRating <= 5) {
-      return "orange";
-    } else if (averageRating >= 6 && averageRating <= 7) {
-      return "yellow";
-    } else if (averageRating >= 8 && averageRating <= 10) {
-      return "green";
-    } else {
-      return "invalid rating";
-    }
-  };
+  //   if (averageRating >= 1 && averageRating <= 2) {
+  //     return "red";
+  //   } else if (averageRating >= 3 && averageRating <= 5) {
+  //     return "orange";
+  //   } else if (averageRating >= 6 && averageRating <= 7) {
+  //     return "yellow";
+  //   } else if (averageRating >= 8 && averageRating <= 10) {
+  //     return "green";
+  //   } else {
+  //     return "invalid rating";
+  //   }
+  // };
 
-  const handleFilterByDate = () => {
-    // Toggle the value of filterByDate
-    setFilterByDate((prevFilter) => !prevFilter);
-    // Sort moods by created_at in the desired order (most recent or oldest first)
-    setMoods((prevMoods) =>
-      [...prevMoods].sort((a, b) => {
-        const dateA = new Date(a.created_at);
-        const dateB = new Date(b.created_at);
-        if (filterByDate) {
-          return dateA - dateB;
-        } else {
-          return dateB - dateA;
-        }
-      })
-    );
-  };
+  // const handleFilterByDate = () => {
+  //   // Toggle the value of filterByDate
+  //   setFilterByDate((prevFilter) => !prevFilter);
+  //   // Sort moods by created_at in the desired order (most recent or oldest first)
+  //   setMoods((prevMoods) =>
+  //     [...prevMoods].sort((a, b) => {
+  //       const dateA = new Date(a.created_at);
+  //       const dateB = new Date(b.created_at);
+  //       if (filterByDate) {
+  //         return dateA - dateB;
+  //       } else {
+  //         return dateB - dateA;
+  //       }
+  //     })
+  //   );
+  // };
 
-  const handleFilterByRate = () => {
-    // Toggle the value of filterByRate
-    setFilterByRate((prevFilter) => !prevFilter);
-    // Sort moods by rating in descending order (highest rating first)
-    setMoods((prevMoods) =>
-      [...prevMoods].sort((a, b) => {
-        if (filterByRate) {
-          return a.rating - b.rating;
-        } else {
-          return b.rating - a.rating;
-        }
-      })
-    );
-  };
+  // const handleFilterByRate = () => {
+  //   // Toggle the value of filterByRate
+  //   setFilterByRate((prevFilter) => !prevFilter);
+  //   // Sort moods by rating in descending order (highest rating first)
+  //   setMoods((prevMoods) =>
+  //     [...prevMoods].sort((a, b) => {
+  //       if (filterByRate) {
+  //         return a.rating - b.rating;
+  //       } else {
+  //         return b.rating - a.rating;
+  //       }
+  //     })
+  //   );
+  // };
 
-  //create a function to sort the moods by category
-  const handleFilterByCategory = (selectedCategory) => {
-    // Toggle the value of filterByCategory
-    setFilterByCategory((prevFilter) => !prevFilter);
+  // //create a function to sort the moods by category
+  // const handleFilterByCategory = (selectedCategory) => {
+  //   // Toggle the value of filterByCategory
+  //   setFilterByCategory((prevFilter) => !prevFilter);
 
-    // Filter moods by selected category
-    const filteredMoods = selectedCategory
-      ? moods.filter((mood) => mood.category === selectedCategory)
-      : moods;
+  //   // Filter moods by selected category
+  //   const filteredMoods = selectedCategory
+  //     ? moods.filter((mood) => mood.category === selectedCategory)
+  //     : moods;
 
-    // Sort filtered moods by category in ascending order
-    const sortedMoods = [...filteredMoods].sort((a, b) => {
-      if (filterByCategory) {
-        return a.category.localeCompare(b.category);
-      } else {
-        return b.category.localeCompare(a.category);
-      }
-    });
+  //   // Sort filtered moods by category in ascending order
+  //   const sortedMoods = [...filteredMoods].sort((a, b) => {
+  //     if (filterByCategory) {
+  //       return a.category.localeCompare(b.category);
+  //     } else {
+  //       return b.category.localeCompare(a.category);
+  //     }
+  //   });
 
-    // Update the state with sorted and filtered moods
-    setMoods(sortedMoods);
-  };
+  //   // Update the state with sorted and filtered moods
+  //   setMoods(sortedMoods);
+  // };
 
-  const buttonBackgroundColor = (selectedCategory) => {
-    if (selectedCategory === filterByCategory) {
-      return "bg-gray-200";
-    } else {
-      return "bg-gray-100";
-    }
-  };
+  // const buttonBackgroundColor = (selectedCategory) => {
+  //   if (selectedCategory === filterByCategory) {
+  //     return "bg-gray-200";
+  //   } else {
+  //     return "bg-gray-100";
+  //   }
+  // };
 
   //save into other database
   // const handleClick = async () => {
@@ -339,26 +344,18 @@ export default function ListMoodPage() {
 
   //create a function to loop trough the moods, get the rate and calculate the average
   const getAverageRating = (moods) => {
-    const ratings = moods.map((mood) => parseFloat(mood.rating));
+    const ratings = moods.map((mood) => parseFloat(mood?.rating));
     const sum = ratings.reduce((sum, rating) => sum + rating, 0);
     const averageRating = sum / ratings.length;
     return averageRating;
   };
 
-  const ratingColor = getRatingColor(moods);
+  // const ratingColor = getRatingColor(moods);
   const averageRating = getAverageRating(moods);
 
   return (
     <>
-      <Grid
-        container
-        spacing={3}
-        direction="row"
-        alignItems="center"
-        sx={{ mt: 4, justifyContent: "center" }}
-      >
-
-
+      <Grid container spacing={3} direction="row" sx={{ mt: 4 }}>
         {alertDelete && (
           <Alert
             severity="success"
@@ -382,7 +379,7 @@ export default function ListMoodPage() {
         <Grid
           item
           xs={12}
-          md={6}
+          md={12}
           sx={{
             textAlign: "center",
             justifyContent: "center",
@@ -390,7 +387,7 @@ export default function ListMoodPage() {
             display: "flex",
           }}
         >
-          <Card sx={{ width: 300, height: 400 }}>
+          <Card sx={{ width: 300, height: 400, borderRadius: 10 }}>
             {getMostUsedCategory(moods) ? (
               <CardHeader
                 title="Most used category"
@@ -450,7 +447,7 @@ export default function ListMoodPage() {
             />
           </Card>
         </Grid>
-        <Grid
+        {/* <Grid
           item
           xs={12}
           md={6}
@@ -522,53 +519,33 @@ export default function ListMoodPage() {
                     <>
                       Highest First
                       <MilitaryTechIcon sx={{ ml: 1 }} />
-                    </>
+                    </>ª
                   )}
                 </Button>
               }
               sx={{ mb: 2 }}
             />
-
-            {/* <FormControlLabel
-      control={
-        <>
-          <Select
-            value={categories}
-            onChange={handleFilterByCategory}
-            disabled={loading || error}
-            sx={{
-              color: "white",
-              width: 200,
-              border: 1,
-              borderColor: "grey.500",
-              borderRadius: 4,
-              mr: 2,
-              input: {
-                color: "white",
-              },
-              InputLabelProps: {
-                color: "white",
-              },
-
-            }}
-          >
-           {categories.map((category) => (
-              <MenuItem value={category}>{category}</MenuItem>
-            ))}
-            
-          </Select>
-        </>
-      }
-    />
-    <Typography variant="h4" component="h1" gutterBottom>
-      Filter by Category
-    </Typography> */}
           </FormGroup>
-        </Grid>
-      </Grid>
-      <Box sx={{ width: "100%" }}>
-        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-          {filterByDate
+        </Grid> */}
+
+        <Grid
+          item
+          xs={12}
+          md={12}
+          sx={{
+            textAlign: "center",
+            justifyContent: "center",
+            alignItems: "center",
+            display: "flex",
+          }}
+        >
+          <ListsMood
+            moods={moods}
+            onDelete={(id) => deleteMood(id)}
+            onModify={() => modifyMood()}
+          />
+
+          {/* {filterByDate
             ? moods
                 .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                 .map((moods) => (
@@ -594,9 +571,9 @@ export default function ListMoodPage() {
                     onDelete={() => deleteMood(moods.id)}
                     onModify={() => modifyMood()}
                   />
-                ))}
+                ))} */}
         </Grid>
-      </Box>
+      </Grid>
     </>
   );
 }
