@@ -2,12 +2,27 @@ import { useState, useEffect } from "react";
 import { NextPage } from "next";
 import { DataGrid } from "@mui/x-data-grid";
 import { Mood } from "@/types/moodTypes";
-import { Card, CardHeader, Grid, Button } from "@mui/material";
+import { Card, CardHeader, Grid, Button, TextField, Dialog, DialogTitle, DialogContent, Select, MenuItem, DialogActions, Alert } from "@mui/material";
 import { useUser } from "@supabase/auth-helpers-react";
+import { de } from "date-fns/locale";
 
-export const ListsMoods: NextPage = () => {
+interface MoodsPropsChange {
+  onDelete?: (id: string) => void;
+  onModify?: (id: string, description: string, rating: number, category: string) => void;
+}
+
+
+export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) => {
 
   const [moods, setMoods] = useState<Mood[]>([]);
+  const [open, setOpen] = useState(false);
+  const [description, setDescription] = useState<string>("");
+  const [rating, setRating] = useState<string>("0");
+  const [category, setCategory] = useState<string>("");
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [oppenAlert, setOppenAlert] = useState<boolean>(false);
+
   const user = useUser();
 
   useEffect(() => {
@@ -21,8 +36,131 @@ export const ListsMoods: NextPage = () => {
         console.error(error);
       }
     }
+    // async function deleteMood(id: string) {
+    //   try {
+    //     const response = await fetch("/api/mood", {
+    //       method: "DELETE",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify({
+    //         id,
+    //       }),
+    //     });
+    //     const { data: moods } = await response.json();
+    //     onDelete(id);
+    //     setMoods(moods as Mood[]);
+
+    //   }
+    //   catch (error) {
+    //     console.error(error);
+    //   }
+    // }
+    // async function modifyMood(id: string, description: string, rating: number, category: string) {
+    //   try {
+    //     const response = await fetch("/api/mood", {
+    //       method: "PUT",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify({
+    //         id,
+    //         description,
+    //         rating,
+    //         category,
+    //       }),
+    //     });
+    //     const { data: moods } = await response.json();
+    //     onModify(id, description, rating, category);
+    //     setMoods(moods as Mood[]);
+    //   }
+    //   catch (error) {
+    //     console.error(error);
+    //   }
+    // }
     getMoods();
-  }, [user]);
+  }, []);
+
+  const deleteMood = async (id: string) => {
+    try {
+      const response = await fetch("/api/mood", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+        }),
+      });
+      const { data: moods } = await response.json();
+      onDelete(id);
+      setMoods(moods as Mood[]);
+    }
+    catch (error) {
+      console.error(error);
+    }
+  }
+
+  const modifyMood = async (id: string, description: string, rating: number, category: string) => {
+    try {
+      const response = await fetch("/api/mood", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+          description,
+          rating,
+          category,
+        }),
+      });
+      const { data: moods } = await response.json();
+      onModify(id, description, rating, category);
+      setMoods(moods as Mood[]);
+    }
+    catch (error) {
+      console.error(error);
+    }
+  }
+
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (rating > "10") {
+      alert("Rating cannot be more than 10");
+      return;
+    }
+    const moodsTop = await fetch("/api/mood", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        description,
+        rating,
+        category,
+      }),
+      
+    });
+
+
+    const response = await fetch("/api/mood", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: moodsTop[0].id,
+      }),
+    });
+    const { data: moods } = await response.json();
+    onDelete(moods[0].id);
+    setMoods(moods as Mood[]);
+    setOpen(false);
+    window.location.reload();
+  };
+   
 
   const formatDateTime = (dateTimeString = "") => {
     const date = new Date(dateTimeString);
@@ -110,6 +248,14 @@ export const ListsMoods: NextPage = () => {
     const sum = ratings.reduce((sum: any, rating: any) => sum + rating, 0);
     const averageRating = sum / ratings.length;
     return averageRating;
+  };
+
+  const handleOpenDialog = () => {
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
   };
 
 
@@ -300,9 +446,18 @@ export const ListsMoods: NextPage = () => {
                     color="primary"
                     size="small"
                     style={{ marginLeft: 16 }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      deleteMood(params.row.id);
+                      window.location.reload();
+
+     
+                    }}
+
                 
                   >
-                    Edit
+                   Delete
                   </Button>
                   <Button
 
@@ -310,9 +465,20 @@ export const ListsMoods: NextPage = () => {
                     color="secondary"
                     size="small"
                     style={{ marginLeft: 16 }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleOpenDialog();
+                      onModify(
+                        params.row.id,
+                        params.row.description,
+                        params.row.rating,
+                        params.row.category
+                      );
+                    }}
                 
                   >
-                    Delete
+                    Edit
                   </Button>
                 </strong>
               ),
@@ -322,6 +488,52 @@ export const ListsMoods: NextPage = () => {
           checkboxSelection
           density="comfortable" />
       </div>
+        <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+          <DialogTitle>Modify Mood</DialogTitle>
+          <DialogContent>
+            <form onSubmit={handleSubmit}>
+              <TextField
+                autoFocus
+                margin="dense"
+                id="description"
+                label="Description"
+                type="text"
+                fullWidth
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+              <TextField
+                autoFocus
+                margin="dense"
+                id="rating"
+                label="Rating"
+                type="number"
+                fullWidth
+                value={rating}
+                onChange={(e) => setRating(e.target.value)}
+              />
+              <Select
+                labelId="category"
+                id="category"
+                value={category}
+                label="Category"
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {categories.map((category, index) => (
+                  <MenuItem key={index} value={category}>
+                    {category}
+                  </MenuItem>
+                ))}
+              </Select>
+
+              <DialogActions>
+                <Button onClick={handleCloseDialog}>Cancel</Button>
+
+                <Button type="submit">Save</Button>
+              </DialogActions>
+            </form>
+          </DialogContent>
+        </Dialog>
 </Grid>      
       
       </Grid>

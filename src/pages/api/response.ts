@@ -20,13 +20,16 @@ export default async function handler(request: Request) {
 
   const payload: OpenAIStreamPayload = {
     model: "gpt-3.5-turbo",
-    // model: `${currentModel}`,
-    messages: [{ role: "user", content: message }],
-    temperature: 0.7,
+    messages: [
+      {
+        role: "user",
+        content: `The following is an analyse between a personal analyst and you that need somenone to give me details about your thougts based on the following message: ${message} and the following is the response from the analyst:`,} 
+    ],
+    temperature: 0.5,
     top_p: 1,
     frequency_penalty: 0,
     presence_penalty: 0,
-    max_tokens: 200,
+    max_tokens: 1000,
     stream: true,
     n: 1,
   };

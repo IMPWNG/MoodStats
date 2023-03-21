@@ -44,7 +44,7 @@ export default function Layout({ children }: LayoutProps) {
                 position="static"
                 color="default"
                 elevation={0}
-                sx={{ borderBottom: (theme) => `1px solid ${theme.palette.divider}`, background: "linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)", borderRadius: 3, border: 0, color: 'white', boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)' }}
+                sx={{ borderBottom: (theme) => `1px solid ${theme.palette.divider}`, background: "linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)", border: 0, color: 'white', boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)' }}
               >
                 <Toolbar sx={{ flexWrap: 'wrap', justifyContent: "center", padding: "1rem" }}>
                   <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1, marginTop: "1rem", marginBottom: "1rem" }}>
@@ -72,6 +72,7 @@ export default function Layout({ children }: LayoutProps) {
                       Ai - Resume
                     </Link>
                   </nav>
+                  <Grid item xs={12} sm={6} md={4} sx={{ justifyContent: "center", display: "flex", marginTop: "1rem" }}>
                   {
                     user ? (
                       <Button href="#" variant="contained" sx={{ my: 1, mx: 1.5 }} onClick={() => supabaseClient.auth.signOut()} color="error">
@@ -83,6 +84,7 @@ export default function Layout({ children }: LayoutProps) {
                       </Button>
                     )
                   }
+                  </Grid>
                 </Toolbar>
               </AppBar>
             </Box>

@@ -48,7 +48,7 @@ export const GeneralForm: NextPage = () => {
       } catch (error) {
         console.log("error", error.message);
       }
-    }
+    } 
     getCategories();
   }, [user, setCategories, setCreateCategory]);
 
@@ -187,12 +187,15 @@ export const GeneralForm: NextPage = () => {
         item
         xs={12}
         md={12}
-        sx={{ textAlign: "center", mt: 4, justifyContent: "center" }}
+        sx={{
+          textAlign: "center",
+          justifyContent: "center",
+          alignItems: "center",
+          display: "flex",
+          mt: 4,
+        }}
       >
-        <Box sx={{ width: "100%", minWidth: 400, p: 10 }}>
-          <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 4, justifyContent: "center", textAlign: "center", display: "flex" }}>
-            Hello {user.email}
-          </Typography>
+        <Box sx={{ width: "100%", minWidth: 400, p: 2 }}>
           <Stepper activeStep={activeStep}>
             {steps.map((label, index) => {
               const stepProps = {};

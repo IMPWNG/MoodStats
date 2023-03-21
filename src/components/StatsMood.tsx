@@ -250,7 +250,7 @@ export const StatsMood: NextPage = () => {
 
   return (
     <Grid container spacing={2}>
-      <Grid
+      {/* <Grid
         item
         xs={12}
         md={12}
@@ -268,7 +268,7 @@ export const StatsMood: NextPage = () => {
         <Typography variant="h5" sx={{ mb: 2 }}>
         {expanded && logDataByDay(sortedDataByDate)}
         </Typography>
-      </Grid>
+      </Grid> */}
       <Grid item xs={12} sx={{ ml: 4, mr: 4 }}>
       <Line data={chartDataRate} />
       </Grid>
