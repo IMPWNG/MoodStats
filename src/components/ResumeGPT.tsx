@@ -1,20 +1,16 @@
 'use client'
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, ReactNode } from "react";
 import useSWR from "swr";
 import {
   Grid,
   Button,
   ButtonGroup,
 } from "@mui/material";
-import Paper from "@mui/material/Paper";
-import InputBase from "@mui/material/InputBase";
-import Divider from "@mui/material/Divider";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
+import { SelectChangeEvent } from "@mui/material/Select";
 import CircularProgress from "@mui/material/CircularProgress";
 import { NextComponentType } from "next";
+import { Mood } from "@/types/moodTypes";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 
 interface ModelType {
   object: 'engine'
@@ -26,43 +22,65 @@ interface ModelType {
 }
 
 const ResumeGPT: NextComponentType = () => {
+  const [moods, setMoods] = useState<Mood[]>([]);
   const messageInput = useRef<HTMLTextAreaElement | null>(null)
   const [response, setResponse] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [models, setModels] = useState<ModelType[]>([])
   const [currentModel, setCurrentModel] = useState<string>('gpt-3.5-turbo')
+  const [message, setMessage] = useState<string>('')
 
-  // useEffect(() => {
-  //   async function getModels() {
-  //     try {
-  //       const response = await fetch("/api/models");
-  //       const { data: models } = await response.json();
-  //       setModels(models);
-  //       const modelIndex = models.findIndex(
-  //         (model: { id: string }) => model.id === "text-davinci-003"
-  //       );
-  //       setCurrentModel(models[modelIndex].id);
-  //     }
-  //     catch (error) {
-  //       console.error(error);
-  //     }
-  //   }
-  //   async function getDescriptions() {
-  //     try {
-  //       const response = await fetch("/api/response");
-  //       const { data: descriptions } = await response.json();
-  //       const uniqueDescriptionString = createUniqueString(descriptions);
-  //       setResumeDescription(uniqueDescriptionString);
-  //       console.log("resumeOfAllDescription", uniqueDescriptionString);
-  //       setOpenDialog(true);
-  //     }
-  //     catch (error) {
-  //       console.error(error);
-  //     }
-  //   }
-  //   getModels();
-  //   getDescriptions();
-  // }, []);
+  const user = useUser();
+
+  useEffect(() => {
+    const descriptions = getAllMoodsDescription();
+    setMessage(descriptions);
+    async function getMoods() {
+      try {
+        const res = await fetch("/api/mood");
+        const { data } = await res.json();
+        setMoods(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    getMoods();
+  }, [user, moods]);
+
+  const getAllMoodsDescription = () => {
+    return moods.map((mood) => mood.description).join("\n");
+  };
+
+  const handleButtonClick = () => {
+    const messageInput = document.getElementById("message-input") as HTMLTextAreaElement;
+    if (messageInput) {
+      messageInput.value = getAllMoodsDescription();
+    }
+  };
+
+
+
+
+  // const handleCloseDialog = () => {
+  //   setOpenDialog(false);
+  // };
+
+  // const handleShowResumeDescription = () => {
+  //   const description = resumeDescription; // replace with the actual resume description
+  //   const totalResponse = [...data, description];
+  //   setResponse(totalResponse);
+  //   localStorage.setItem("response", JSON.stringify(totalResponse));
+  //   console.log("response", data);
+  // };
+
+  // const handleResumeMood = () => {
+  //   const description = ""; // replace with the actual resume description
+  //   const totalResponse = [...data, description];
+  //   setResponse(totalResponse);
+  //   localStorage.setItem("response", JSON.stringify(totalResponse));
+  //   console.log("response", data);
+  // };
+
 
 
   const handleEnter = (
@@ -122,12 +140,9 @@ const ResumeGPT: NextComponentType = () => {
       const { value, done: doneReading } = await reader.read()
       done = doneReading
       const chunkValue = decoder.decode(value)
-      // currentResponse = [...currentResponse, message, chunkValue];
       currentResponse = [...currentResponse, chunkValue]
       setResponse((prev) => [...prev.slice(0, -1), currentResponse.join('')])
     }
-    // breaks text indent on refresh due to streaming
-    // localStorage.setItem('response', JSON.stringify(currentResponse));
     setIsLoading(false)
   }
 
@@ -148,281 +163,102 @@ const ResumeGPT: NextComponentType = () => {
 
   useSWR('fetchingModels', fetcher)
 
-  const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCurrentModel(e.target.value)
+  const handleModelChange = (event: SelectChangeEvent<string>, child: ReactNode) => {
+    setCurrentModel(event.target.value);
   }
 
-  // const createUniqueString = (data: any) => {
-  //   let result = "";
-  //   data.forEach((item: { description: any; }) => {
-  //     result += item.description;
-  //   });
-  //   return result;
-  // };
-
-  // const handleCloseDialog = () => {
-  //   setOpenDialog(false);
-  // };
-
-  // const handleShowResumeDescription = () => {
-  //   const description = resumeDescription; // replace with the actual resume description
-  //   const totalResponse = [...data, description];
-  //   setResponse(totalResponse);
-  //   localStorage.setItem("response", JSON.stringify(totalResponse));
-  //   console.log("response", data);
-  // };
-
-  // const handleResumeMood = () => {
-  //   const description = ""; // replace with the actual resume description
-  //   const totalResponse = [...data, description];
-  //   setResponse(totalResponse);
-  //   localStorage.setItem("response", JSON.stringify(totalResponse));
-  //   console.log("response", data);
-  // };
-
   return (
-    <div className='flex justify-center'>
-      <select
-        value={currentModel}
-        onChange={handleModelChange}
-        className='w-72 fixed top-5 left-5 outline-none border-none p-4 rounded-md bg-white text-gray-500 dark:hover:text-gray-400 dark:hover:bg-gray-900'
-      >
-        {models.map((model) => (
-          <option key={model.id} value={model.id}>
-            {model.id}
-          </option>
-        ))}
-      </select>
+    <Grid container spacing={2}>
+      <Grid item xs={12} md={12} sx={{ justifyContent: "center", textAlign: "center", mt: -30 }}>
+        <ButtonGroup
+          variant="contained"
+          aria-label="contained primary button group"
+          sx={{
+            justifyContent: "center",
+            textAlign: "center",
+            marginTop: "20px",
+            marginBottom: "20px",
+          }}
+        >
+          <Button
+            sx={{
+              justifyContent: "center",
+              textAlign: "center",
+            }}
+           onClick={handleButtonClick}
 
-      <button
-        onClick={handleReset}
-        type='reset'
-        className='fixed top-5 right-5 p-4 rounded-md bg-white text-gray-500 dark:hover:text-gray-400 dark:hover:bg-gray-900 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent'
-      >
-        Clear History
-      </button>
-      <div className='w-full mx-2 flex flex-col items-start gap-3 pt-6 last:mb-6 md:mx-auto md:max-w-3xl'>
+          >
+            Resume your daily mood
+          </Button>
+          <Button>
+            Resume your weekly mood
+          </Button>
+          <Button>
+            Resume your monthly mood
+          </Button>
+          <Button
+            onClick={handleReset}
+            color="error"
+            sx={{
+              justifyContent: "center",
+              textAlign: "center",
+            }}
+          >
+            Clear history
+          </Button>
+        </ButtonGroup>
+      </Grid>
+      <Grid item xs={6} md={6} sx={{ mt: -2 }}>
         {isLoading
           ? response.map((item: any, index: number) => {
             return (
-              <div
+              <Grid item xs={6} md={6}
                 key={index}
                 className={`${index % 2 === 0 ? 'bg-blue-500' : 'bg-gray-500'
                   } p-3 rounded-lg`}
               >
                 <p>{item}</p>
-              </div>
+              </Grid>
             )
           })
           : response
             ? response.map((item: string, index: number) => {
               return (
-                <div
+                <Grid item xs={12} md={12}
                   key={index}
                   className={`${index % 2 === 0 ? 'bg-blue-500' : 'bg-gray-500'
                     } p-3 rounded-lg`}
                 >
                   <p>{item}</p>
-                </div>
+                </Grid>
               )
             })
             : null}
-      </div>
-      <form
-        onSubmit={handleSubmit}
-        className='fixed bottom-0 w-full md:max-w-3xl bg-gray-700 rounded-md shadow-[0_0_10px_rgba(0,0,0,0.10)] mb-4'
-      >
-        <textarea
-          name='Message'
-          placeholder='Type your query'
-          ref={messageInput}
-          onKeyDown={handleEnter}
-          className='w-full resize-none bg-transparent outline-none pt-4 pl-4 translate-y-1'
-        />
-        <button
-          disabled={isLoading}
-          type='submit'
-          className='absolute top-[1.4rem] right-5 p-1 rounded-md text-gray-500 dark:hover:text-gray-400 dark:hover:bg-gray-900 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent'
+      </Grid>
+      <Grid item xs={12} md={12} sx={{ justifyContent: "center", textAlign: "center", alignContent: "center", alignItems: "center" }}>
+        <form
+          onSubmit={handleSubmit}
+          className='fixed bottom-0 w-full md:max-w-3xl bg-gray-700 rounded-md shadow-[0_0_10px_rgba(0,0,0,0.10)] mb-4'
         >
-          <svg
-            stroke='currentColor'
-            fill='currentColor'
-            strokeWidth='0'
-            viewBox='0 0 20 20'
-            className='h-4 w-4 rotate-90'
-            height='1em'
-            width='1em'
-            xmlns='http://www.w3.org/2000/svg'
+          <textarea
+            id="message-input"
+            name="Message"
+            placeholder="Type your query"
+            onKeyDown={handleEnter}
+            ref={messageInput}
+            className="w-full resize-none bg-transparent outline-none pt-4 pl-4 translate-y-1"
+          />
+          <Button
+            disabled={isLoading}
+            type='submit'
+            variant='contained'
+            color='primary'
           >
-            <path d='M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z'></path>
-          </svg>
-        </button>
-      </form>
-    </div>
-    // <Grid container spacing={2} >
-    //   <Grid item xs={12} md={12} sx={{ mt: -2, justifyContent: "center", textAlign: "center", alignContent: "center", alignItems: "center", m: 2 }}>
-    //     {/* <ButtonGroup
-    //       variant="contained"
-    //       aria-label="contained primary button group"
-    //       sx={{
-    //         justifyContent: "center",
-    //         textAlign: "center",
-    //         marginTop: "20px",
-    //         marginBottom: "20px",
-    //       }}
-    //     >
-    //       <Button
-    //         onClick={handleShowResumeDescription}
-    //         sx={{
-    //           justifyContent: "center",
-    //           textAlign: "center",
-    //         }}
-    //       >
-    //         Resume your daily mood
-    //       </Button>
-    //       <Button onClick={handleShowResumeDescription}>
-    //         Resume your weekly mood
-    //       </Button>
-    //       <Button onClick={handleShowResumeDescription}>
-    //         Resume your monthly mood
-    //       </Button>
-    //       <Button
-    //         onClick={handleReset}
-    //         color="error"
-    //         sx={{
-    //           justifyContent: "center",
-    //           textAlign: "center",
-    //         }}
-    //       >
-    //         Clear history
-    //       </Button>
-    //     </ButtonGroup> */}
-
-    //     {/* <div>
-    //     <dialog
-    //       className="dialog"
-    //       open={openDialog}
-    //       onClick={handleCloseDialog}
-    //     >
-    //       <div className="dialog__overlay"></div>
-    //       <div className="dialog__content">
-    //         <div className="dialog__body">
-    //           <p>{resumeDescription}</p>
-    //         </div>
-    //         <div className="dialog__footer">
-    //           <button
-    //             onClick={handleCloseDialog}
-    //             className="border-red-500 border-2 rounded-md p-2 text-white mb-25"
-    //           >
-    //             Close
-    //           </button>
-    //         </div>
-    //       </div>
-    //     </dialog>
-    //   </div> */}
-
-    //     <Grid item xs={12} md={12}>
-    //       {isLoading ? (
-    //         response.map((item, index) => {
-    //           return (
-    //             <div
-    //               key={index}
-    //               className={`${index % 2 === 0 ? "bg-blue-500" : "bg-gray-500"
-    //                 } p-3 rounded-lg`}
-    //             >
-    //               <p>{item}</p>
-    //             </div>
-    //           );
-    //         })
-    //       ) : response ? (
-    //         response.map((item, index) => {
-    //           return (
-    //             <div
-    //               key={index}
-    //               className={`${index % 2 === 0 ? "bg-blue-500" : "bg-gray-500"
-    //                 } p-3 rounded-lg`}
-    //             >
-    //               <p>{item}</p>
-    //             </div>
-    //           );
-    //         })
-    //       ) : (
-    //         <div className="bg-gray-500 p-3 rounded-lg">
-    //           <p>Hi, I'm your personal assistant. How can I help you?</p>
-    //         </div>
-    //       )}
-    //     </Grid>
-    //     <Grid
-    //       item
-    //       xs={12}
-    //       md={12}
-    //       sx={{ justifyContent: "center", textAlign: "center", height: 470 }}
-    //     >
-    //       ...
-    //     </Grid>
-    //     <Grid
-    //       item
-    //       xs={12}
-    //       md={12}
-    //       sx={{
-    //         justifyContent: "center",
-    //         textAlign: "center",
-    //         alignItems: "center",
-    //       }}
-    //     >
-    //       <Paper
-    //         component="form"
-    //         sx={{
-    //           display: "flex",
-    //           alignItems: "center",
-
-    //           height: 50,
-    //           justifyContent: "center",
-    //           textAlign: "center",
-    //           borderRadius: 2,
-    //           position: "relative",
-    //           bottom: 0,
-    //         }}
-    //       >
-    //         <InputBase
-    //           sx={{ ml: 1, flex: 1, width: "100%" }}
-    //           placeholder="Type your query"
-    //           inputProps={{ "aria-label": "search .." }}
-    //           onKeyDown={handleEnter}
-    //         />
-
-    //         <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-    //         <Button
-    //           type="submit"
-    //           sx={{ p: "10px 15px" }}
-    //           onClick={(() => handleSubmit)}
-
-    //         >
-    //           {isLoading ? <CircularProgress size={20} /> : "Ask"}
-    //         </Button>
-
-    //         <FormControl fullWidth sx={{ m: 1, ml: 4, maxWidth: 150 }}>
-    //           <InputLabel id="demo-simple-select-label">Model dIA</InputLabel>
-    //           <Select
-    //             labelId="demo-simple-select-label"
-    //             id="demo-simple-select"
-    //             label="Model dIA"
-    //             value={currentModel}
-    //             onChange={() => handleModelChange}
-              
-
-    //           >
-    //              {models.map((model) => (
-    //       <option key={model.id} value={model.id}>
-    //         {model.id}
-    //       </option>
-    //     ))}
-    //           </Select>
-    //         </FormControl>
-    //       </Paper>
-    //     </Grid>
-    //   </Grid>
-    // </Grid>
+            {isLoading ? <CircularProgress size={20} /> : "Ask"}
+          </Button>
+        </form>
+      </Grid>
+    </Grid>
   );
 }
 
