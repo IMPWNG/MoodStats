@@ -16,6 +16,7 @@
     "@mui/material": "^5.11.10",
     "@mui/x-data-grid": "^6.0.2",
     "@next/font": "13.1.6",
+    "@reduxjs/toolkit": "^1.9.3",
     "@supabase/auth-helpers-nextjs": "^0.5.4",
     "@supabase/auth-helpers-react": "^0.3.1",
     "@supabase/auth-ui-react": "^0.2.8",
@@ -34,16 +35,20 @@
     "install-peerdeps": "^3.0.3",
     "moment-timezone": "^0.5.40",
     "next": "13.1.6",
+    "next-redux-wrapper": "^8.1.0",
     "openai": "^3.1.0",
     "react": "18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "18.2.0",
+    "react-redux": "^8.0.5",
     "recharts": "^2.4.3",
     "swr": "^2.0.3"
   },
   "devDependencies": {
+    "@types/node": "18.15.3",
     "postcss-flexbugs-fixes": "4.2.1",
     "postcss-preset-env": "^6.7.0",
-    "tailwindcss": "^1.7.4"
+    "tailwindcss": "^1.7.4",
+    "typescript": "5.0.2"
   }
 }

@@ -10,45 +10,57 @@ import {
   StepLabel,
   Card,
   CardContent,
-  IconButton,
   Alert,
 } from "@mui/material";
 import Link from "next/link";
-import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import CircularProgress from "@mui/material/CircularProgress";
 
 const steps = ["💬", "📁", "💯"];
 
-export default function GeneralForm() {
-  const [moods, setMoods] = useState([]);
-  const [newDescriptionText, setNewDescriptionText] = useState("");
-  const [clicked, setClicked] = useState(null);
-  const [categoryText, setCategoryText] = useState("");
-  const [isAdded, setIsAdded] = useState(false);
-  const [activeStep, setActiveStep] = useState(0);
-  const [alert, setAlert] = useState(false);
-  const [createCategory, setCreateCategory] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+export const GeneralForm = () => {
+
+  const [moods, setMoods] = useState<any[]>([]);
+  const [newDescriptionText, setNewDescriptionText] = useState<string>("");
+  const [clicked, setClicked] = useState<number | null>(null);
+  const [categoryText, setCategoryText] = useState<string>("");
+  const [isAdded, setIsAdded] = useState<boolean>(false);
+  const [activeStep, setActiveStep] = useState<number>(0);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [createCategory, setCreateCategory] = useState<string[]>([]);
+  const [alert, setAlert] = useState<boolean>(false);
+
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const user = useUser();
+  const supabase = useSupabaseClient();
+
 
   useEffect(() => {
-    const getCategories = async () => {
-      const { data, error } = await supabase
-        .from("stats")
-        .select("category")
-        .eq("user_id", user.id);
-
-      if (error) throw error;
-      const categories = data.map((item) => item.category);
-      const uniqueCategories = [...new Set(categories)];
-      setCreateCategory(uniqueCategories);
-      setCategories(data);
-    };
+    async function fetchMoods() {
+      try {
+        const res = await fetch("/api/mood");
+        const data = await res.json();
+        setMoods(data);
+      } catch (error) {
+        console.log("error", error.message);
+      }
+    }
+    async function getCategories() {
+      try {
+        const res = await fetch(`/api/mood`);
+        const { data } = await res.json();
+        const categories = data.map((item: any) => item.category);
+        const uniqueCategories = [...new Set(categories)];
+        setCreateCategory(uniqueCategories as string[]);
+        setCategories(data);
+      } catch (error) {
+        console.log("error", error.message);
+      }
+    }
+    fetchMoods();
     getCategories();
-  }, []);
-
-  const supabase = useSupabaseClient();
-  const user = useUser();
+  }, [user, setCategories, setCreateCategory]);
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -168,7 +180,7 @@ export default function GeneralForm() {
     }
   };
 
-  const getUniqueCategories = (categories) => {
+  const getUniqueCategories = (categories: any[]) => {
     const uniqueCategories = [];
     categories.forEach((category) => {
       if (!uniqueCategories.includes(category.category)) {
@@ -187,11 +199,13 @@ export default function GeneralForm() {
         sx={{ textAlign: "center", mt: 4, justifyContent: "center" }}
       >
         <Box sx={{ width: "100%", minWidth: 400, p: 10 }}>
+          <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 4, justifyContent: "center", textAlign: "center", display: "flex" }}>
+            Hello {user.email}
+          </Typography>
           <Stepper activeStep={activeStep}>
             {steps.map((label, index) => {
               const stepProps = {};
               const labelProps = {};
-
               return (
                 <Step key={label} {...stepProps}>
                   <StepLabel {...labelProps}>{label}</StepLabel>
@@ -217,8 +231,8 @@ export default function GeneralForm() {
           {activeStep === steps.length ? (
             <>
               {newDescriptionText.length > 0 &&
-              categoryText.length > 0 &&
-              clicked != null ? (
+                categoryText.length > 0 &&
+                clicked != null ? (
                 <Typography sx={{ mt: 2, mb: 1 }}>
                   All steps completed - you can submit your mood!
                 </Typography>
@@ -397,26 +411,26 @@ export default function GeneralForm() {
                       rows={3}
                       sx={{
                         justifyContent: "center",
-                        input: { color: "white" },
-                        label: { color: "white" },
+                        input: { color: "black" },
+                        label: { color: "black" },
                         textAlign: "center",
                         mb: 4,
                         "& .MuiOutlinedInput-root": {
                           "& fieldset": {
-                            borderColor: "white",
+                            borderColor: "black",
                           },
                           "&:hover fieldset": {
-                            borderColor: "white",
+                            borderColor: "black",
                           },
                           "&.Mui-focused fieldset": {
-                            borderColor: "white",
+                            borderColor: "black",
                           },
                         },
                         "& .MuiOutlinedInput-input": {
-                          color: "white",
+                          color: "black",
                         },
                         "& .MuiInputLabel-root": {
-                          color: "white",
+                          color: "black",
                         },
                       }}
                       onChange={(e) => setCategoryText(e.target.value)}
@@ -527,7 +541,7 @@ export default function GeneralForm() {
                             m: 1,
                           }}
                         >
-                          2
+
                         </Button>
                       )}
                       {clicked === 3 ? (

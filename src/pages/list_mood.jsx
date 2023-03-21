@@ -15,7 +15,7 @@ import FolderIcon from "@mui/icons-material/Folder";
 import FiberNewIcon from "@mui/icons-material/FiberNew";
 import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
 import NotInterestedIcon from "@mui/icons-material/NotInterested";
-import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
 export default function ListMoodPage() {
   const [moods, setMoods] = useState([]);
@@ -29,7 +29,6 @@ export default function ListMoodPage() {
   const [alertDelete, setAlertDelete] = useState(false);
 
   const supabase = useSupabaseClient();
-  const user = useUser();
 
   useEffect(() => {
     async function fetchMoods() {
@@ -131,8 +130,8 @@ export default function ListMoodPage() {
 
   const getMostUsedCategory = (moods) => {
     const categoryCounts = {};
-    moods.forEach((moods) => {
-      const category = moods?.category;
+    moods.forEach((mood) => {
+      const category = mood?.category;
       if (category in categoryCounts) {
         categoryCounts[category] += 1;
       } else {

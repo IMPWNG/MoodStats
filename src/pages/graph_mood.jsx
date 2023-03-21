@@ -2,7 +2,7 @@ import React from "react";
 import StatsMood from "@/components/StatsMood";
 import { useState, useEffect } from "react";
 import { Grid, Typography, Button } from "@mui/material";
-import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import Link from "next/link";
 
 export default function GraphMoodPage() {
@@ -10,7 +10,6 @@ export default function GraphMoodPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const supabase = useSupabaseClient();
-  const user = useUser();
 
   useEffect(() => {
     async function fetchMoods() {
