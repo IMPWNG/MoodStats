@@ -1,15 +1,16 @@
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { Grid } from "@mui/material";
 
-import { getURL } from "@/utils/helpers";
+import { getURL } from "@/utils/url";
 
 const SignIn = () => {
   const router = useRouter();
   const supabaseClient = useSupabaseClient();
+  const user = useUser();
 
   useEffect(() => {
     if (user) {

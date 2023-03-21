@@ -1,29 +1,14 @@
 import React from "react";
-import {GeneralForm} from "@/components/GeneralForm";
-import useSWR from 'swr';
+import { GeneralForm } from "@/components/GeneralForm";
 import {
   useSession,
 } from "@supabase/auth-helpers-react";
-import { useEffect, useState } from "react";
 import { Grid, Typography } from "@mui/material";
-import { fetcher } from "@/utils/fetcher";
+import { NextPage } from "next";
 
-export default function IndexPage() {
-
-  const [moods, setMoods] = useState<any>([]);
+const Home: NextPage = () => {
 
   const session = useSession();
-
-  const { data, error } = useSWR("/api/mood", fetcher);
-
-  useEffect(() => {
-    if (data) {
-      setMoods(data);
-    } else {
-      console.log("error", error);
-      setMoods([]);
-    }
-  }, [data, error]);
 
   return (
     <Grid container justifyContent="center" alignItems="center" sx={{ height: '80vh' }}>
@@ -48,3 +33,5 @@ export default function IndexPage() {
     </Grid>
   );
 }
+
+export default Home;

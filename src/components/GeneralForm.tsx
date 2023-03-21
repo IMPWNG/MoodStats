@@ -13,20 +13,21 @@ import {
   Alert,
 } from "@mui/material";
 import Link from "next/link";
+import { NextPage } from "next";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { Mood } from "@/types/moodTypes";
 import CircularProgress from "@mui/material/CircularProgress";
 
 const steps = ["💬", "📁", "💯"];
 
-export const GeneralForm = () => {
-
-  const [moods, setMoods] = useState<any[]>([]);
+export const GeneralForm: NextPage = () => {
+  const [moods, setMoods] = useState<Mood[]>([]);
   const [newDescriptionText, setNewDescriptionText] = useState<string>("");
   const [clicked, setClicked] = useState<number | null>(null);
   const [categoryText, setCategoryText] = useState<string>("");
   const [isAdded, setIsAdded] = useState<boolean>(false);
   const [activeStep, setActiveStep] = useState<number>(0);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [createCategory, setCreateCategory] = useState<string[]>([]);
   const [alert, setAlert] = useState<boolean>(false);
 
@@ -35,17 +36,7 @@ export const GeneralForm = () => {
   const user = useUser();
   const supabase = useSupabaseClient();
 
-
   useEffect(() => {
-    async function fetchMoods() {
-      try {
-        const res = await fetch("/api/mood");
-        const data = await res.json();
-        setMoods(data);
-      } catch (error) {
-        console.log("error", error.message);
-      }
-    }
     async function getCategories() {
       try {
         const res = await fetch(`/api/mood`);
@@ -58,7 +49,6 @@ export const GeneralForm = () => {
         console.log("error", error.message);
       }
     }
-    fetchMoods();
     getCategories();
   }, [user, setCategories, setCreateCategory]);
 
@@ -117,13 +107,14 @@ export const GeneralForm = () => {
         setAlert(false);
       }, 3000);
 
+
       if (error) throw error;
     } catch (error) {
       console.log("error", error.message);
     }
   };
 
-  const handleClickedButton = (rating) => {
+  const handleClickedButton = (rating: number) => {
     setClicked(rating);
   };
 
@@ -135,7 +126,7 @@ export const GeneralForm = () => {
     }
   };
 
-  const getMostUsedEmoji = (moods) => {
+  const getMostUsedEmoji = (moods: Mood[]) => {
     const ratingCounts = {
       1: 0,
       2: 0,
@@ -149,7 +140,7 @@ export const GeneralForm = () => {
       10: 0,
     };
 
-    moods.forEach((mood) => {
+    moods.forEach((mood: Mood) => {
       const rating = mood.rating;
       ratingCounts[rating] += 1;
     });
@@ -207,13 +198,12 @@ export const GeneralForm = () => {
               const stepProps = {};
               const labelProps = {};
               return (
-                <Step key={label} {...stepProps}>
+                <Step key={index} {...stepProps}>
                   <StepLabel {...labelProps}>{label}</StepLabel>
                 </Step>
               );
             })}
           </Stepper>
-
           {alert && (
             <Alert
               sx={{ mt: 4, mb: 4 }}
@@ -292,7 +282,6 @@ export const GeneralForm = () => {
                   )}
                 </Typography>
               )}
-
               <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
                 <Card sx={{ display: "flex", width: "100%" }}>
                   <Box sx={{ display: "flex", flexDirection: "column" }}>
@@ -379,20 +368,20 @@ export const GeneralForm = () => {
                         justifyContent: "center",
                         "& .MuiOutlinedInput-root": {
                           "& fieldset": {
-                            borderColor: "white",
+                            borderColor: "black",
                           },
                           "&:hover fieldset": {
-                            borderColor: "white",
+                            borderColor: "black",
                           },
                           "&.Mui-focused fieldset": {
-                            borderColor: "white",
+                            borderColor: "black",
                           },
                         },
                         "& .MuiOutlinedInput-input": {
-                          color: "white",
+                          color: "black",
                         },
                         "& .MuiInputLabel-root": {
-                          color: "white",
+                          color: "black",
                         },
                       }}
                     />
@@ -438,11 +427,12 @@ export const GeneralForm = () => {
 
                     <Grid container spacing={2} sx={{ mt: 2 }}>
                       <Grid item xs={12} sm={12}>
-                        {getUniqueCategories(categories).map((category) => {
+                        {getUniqueCategories(categories).map((category, index) => {
                           return (
                             <Button
                               onClick={() => setCategoryText(category)}
                               sx={{ ml: 1 }}
+                              key={index}
                             >
                               {category}
                             </Button>
@@ -482,7 +472,6 @@ export const GeneralForm = () => {
                       spacing={2}
                       sx={{ mt: 4, justifyContent: "space-evenly" }}
                     >
-                      {/* //change the color of the button if it is clicked */}
                       {clicked === 1 ? (
                         <Button
                           className={getButtonClass(1)}
@@ -492,6 +481,7 @@ export const GeneralForm = () => {
                             ":hover": { color: "green" },
                             m: 1,
                             backgroundColor: "green",
+
                           }}
                           variant="contained"
                         >
@@ -503,20 +493,14 @@ export const GeneralForm = () => {
                           onClick={() => handleClickedButton(1)}
                           sx={{
                             color: "white",
-                            ":hover": { color: "white" },
+                            ":hover": { color: "white", backgroundColor: "green" },
                             m: 1,
+                            backgroundColor: "primary.main",
                           }}
                         >
                           1
                         </Button>
                       )}
-
-                      {/* <Button
-                        className={getButtonClass(1)}
-                        onClick={() => handleClickedButton(1)}
-                      >
-                        1
-                      </Button> */}
                       {clicked === 2 ? (
                         <Button
                           className={getButtonClass(1)}
@@ -526,6 +510,7 @@ export const GeneralForm = () => {
                             ":hover": { color: "green" },
                             m: 1,
                             backgroundColor: "green",
+
                           }}
                           variant="contained"
                         >
@@ -537,11 +522,11 @@ export const GeneralForm = () => {
                           onClick={() => handleClickedButton(2)}
                           sx={{
                             color: "white",
-                            ":hover": { color: "white" },
+                            ":hover": { color: "white", backgroundColor: "green" },
                             m: 1,
+                            backgroundColor: "primary.main",
                           }}
-                        >
-
+                        >2
                         </Button>
                       )}
                       {clicked === 3 ? (
@@ -553,6 +538,7 @@ export const GeneralForm = () => {
                             ":hover": { color: "green" },
                             m: 1,
                             backgroundColor: "green",
+
                           }}
                           variant="contained"
                         >
@@ -564,8 +550,9 @@ export const GeneralForm = () => {
                           onClick={() => handleClickedButton(3)}
                           sx={{
                             color: "white",
-                            ":hover": { color: "white" },
+                            ":hover": { color: "white", backgroundColor: "green" },
                             m: 1,
+                            backgroundColor: "primary.main",
                           }}
                         >
                           3
@@ -580,6 +567,7 @@ export const GeneralForm = () => {
                             ":hover": { color: "green" },
                             m: 1,
                             backgroundColor: "green",
+
                           }}
                           variant="contained"
                         >
@@ -591,8 +579,9 @@ export const GeneralForm = () => {
                           onClick={() => handleClickedButton(4)}
                           sx={{
                             color: "white",
-                            ":hover": { color: "white" },
+                            ":hover": { color: "white", backgroundColor: "green" },
                             m: 1,
+                            backgroundColor: "primary.main",
                           }}
                         >
                           4
@@ -607,6 +596,7 @@ export const GeneralForm = () => {
                             ":hover": { color: "green" },
                             m: 1,
                             backgroundColor: "green",
+
                           }}
                           variant="contained"
                         >
@@ -618,8 +608,9 @@ export const GeneralForm = () => {
                           onClick={() => handleClickedButton(5)}
                           sx={{
                             color: "white",
-                            ":hover": { color: "white" },
+                            ":hover": { color: "white", backgroundColor: "green" },
                             m: 1,
+                            backgroundColor: "primary.main",
                           }}
                         >
                           5
@@ -634,6 +625,7 @@ export const GeneralForm = () => {
                             ":hover": { color: "green" },
                             m: 1,
                             backgroundColor: "green",
+
                           }}
                           variant="contained"
                         >
@@ -645,8 +637,9 @@ export const GeneralForm = () => {
                           onClick={() => handleClickedButton(6)}
                           sx={{
                             color: "white",
-                            ":hover": { color: "white" },
+                            ":hover": { color: "white", backgroundColor: "green" },
                             m: 1,
+                            backgroundColor: "primary.main",
                           }}
                         >
                           6
@@ -661,6 +654,7 @@ export const GeneralForm = () => {
                             ":hover": { color: "green" },
                             m: 1,
                             backgroundColor: "green",
+
                           }}
                           variant="contained"
                         >
@@ -672,8 +666,9 @@ export const GeneralForm = () => {
                           onClick={() => handleClickedButton(7)}
                           sx={{
                             color: "white",
-                            ":hover": { color: "white" },
+                            ":hover": { color: "white", backgroundColor: "green" },
                             m: 1,
+                            backgroundColor: "primary.main",
                           }}
                         >
                           7
@@ -688,6 +683,7 @@ export const GeneralForm = () => {
                             ":hover": { color: "green" },
                             m: 1,
                             backgroundColor: "green",
+
                           }}
                           variant="contained"
                         >
@@ -699,8 +695,9 @@ export const GeneralForm = () => {
                           onClick={() => handleClickedButton(8)}
                           sx={{
                             color: "white",
-                            ":hover": { color: "white" },
+                            ":hover": { color: "white", backgroundColor: "green" },
                             m: 1,
+                            backgroundColor: "primary.main",
                           }}
                         >
                           8
@@ -715,6 +712,7 @@ export const GeneralForm = () => {
                             ":hover": { color: "green" },
                             m: 1,
                             backgroundColor: "green",
+
                           }}
                           variant="contained"
                         >
@@ -726,8 +724,9 @@ export const GeneralForm = () => {
                           onClick={() => handleClickedButton(9)}
                           sx={{
                             color: "white",
-                            ":hover": { color: "white" },
+                            ":hover": { color: "white", backgroundColor: "green" },
                             m: 1,
+                            backgroundColor: "primary.main",
                           }}
                         >
                           9
@@ -742,6 +741,7 @@ export const GeneralForm = () => {
                             ":hover": { color: "green" },
                             m: 1,
                             backgroundColor: "green",
+
                           }}
                           variant="contained"
                         >
@@ -753,8 +753,9 @@ export const GeneralForm = () => {
                           onClick={() => handleClickedButton(10)}
                           sx={{
                             color: "white",
-                            ":hover": { color: "white" },
+                            ":hover": { color: "white", backgroundColor: "green" },
                             m: 1,
+                            backgroundColor: "primary.main",
                           }}
                         >
                           10

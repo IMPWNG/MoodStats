@@ -1,5 +1,7 @@
-import { Line, Bar, registerables } from "react-chartjs-2";
-
+import { Line, Bar } from "react-chartjs-2";
+import { NextPage } from "next";
+import { useUser } from "@supabase/auth-helpers-react";
+import { Mood } from "@/types/moodTypes";
 import {
   Chart,
   CategoryScale,
@@ -23,7 +25,7 @@ import {
   Grid,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 Chart.register(
   CategoryScale,
   LinearScale,
@@ -65,9 +67,27 @@ export const options = {
   },
 };
 
-export default function StatsMood({ moods: data }) {
-  const [expanded, setExpanded] = useState(false);
-  const formatDateTime = (dateTimeString, format) => {
+export const StatsMood: NextPage = () => {
+  const [moods, setMoods] = useState<Mood[]>([]);
+  const [expanded, setExpanded] = useState<boolean>(false);
+
+  const user = useUser();
+
+  useEffect(() => {
+    async function getMoods() {
+      try {
+        const response = await fetch("/api/mood");
+        const { data: moods } = await response.json();
+        setMoods(moods as Mood[]);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    getMoods();
+  }, [user]);
+
+
+  const formatDateTime = (dateTimeString = "", format = "") => {
     const date = new Date(dateTimeString);
     const year = date.getFullYear();
     const month = ("0" + (date.getMonth() + 1)).slice(-2);
@@ -75,7 +95,7 @@ export default function StatsMood({ moods: data }) {
     const hours = ("0" + date.getHours()).slice(-2);
     const minutes = ("0" + date.getMinutes()).slice(-2);
     const seconds = ("0" + date.getSeconds()).slice(-2);
-    let formattedDateTime;
+    let formattedDateTime = "";
     switch (format) {
       case "date":
         formattedDateTime = `${year}-${month}-${day}`;
@@ -90,14 +110,23 @@ export default function StatsMood({ moods: data }) {
     return formattedDateTime;
   };
 
-  const sortedDataByDate = data?.sort(
-    (a, b) => new Date(a.created_at) - new Date(b.created_at)
+  const sortedDataByDate = moods?.sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
   );
   const labels = sortedDataByDate?.map((item) =>
     formatDateTime(item.created_at, "date")
   );
 
-  const sortedDataByCategory = data?.sort((a, b) => a.category - b.category);
+  const sortedDataByCategory = moods?.sort((a, b) => {
+    if (a.category < b.category) {
+      return -1;
+    }
+    if (a.category > b.category) {
+      return 1;
+    }
+    return 0;
+  });
+  
 
   const dataByCategory = {};
   sortedDataByCategory?.forEach((item) => {
@@ -127,9 +156,9 @@ export default function StatsMood({ moods: data }) {
     count: dataByDay[dateStr].length,
   }));
 
-  function logDataByDay(data) {
+  function logDataByDay(data: any) {
     const dataByDay = {};
-    data.forEach((item) => {
+    data.forEach((item: any) => {
       const dateStr = formatDateTime(item.created_at, "date");
       if (!dataByDay[dateStr]) {
         dataByDay[dateStr] = [];
@@ -146,7 +175,7 @@ export default function StatsMood({ moods: data }) {
         setExpanded(!expanded);
       };
 
-      const itemElements = items.map((item) => (
+      const itemElements = items.map((item: any) => (
         <ListItem key={item.id}>
           <ListItemText primary={JSON.stringify(item)} />
         </ListItem>
@@ -177,7 +206,7 @@ export default function StatsMood({ moods: data }) {
     datasets: [
       {
         label: "Rate",
-        data: data?.map((item) => item.rating),
+        data: moods?.map((item) => item.rating),
         borderColor: "rgb(255, 99, 132)",
         backgroundColor: "rgba(255, 99, 132, 0.5)",
         yAxisID: "y",
@@ -187,7 +216,7 @@ export default function StatsMood({ moods: data }) {
       scales: {
         x: {
           type: "date",
-          labels: data?.map((item) => formatDateTime(item.created_at, "date")),
+          labels: moods?.map((item) => formatDateTime(item.created_at, "date")),
         },
       },
     },
@@ -219,108 +248,20 @@ export default function StatsMood({ moods: data }) {
     ],
   };
 
-  const optionsRate = {
-    responsive: true,
-    interaction: {
-      mode: "index",
-      intersect: false,
-    },
-    stacked: false,
-    plugins: {
-      title: {
-        display: true,
-        text: "See the rate of your mood by date",
-      },
-      ChartRough: {
-        roughness: 2,
-        bowing: 2,
-      },
-    },
-
-    scales: {
-      yAxes: [
-        {
-          ticks: {
-            suggestedMin: 0,
-            suggestedMax: 100,
-          },
-        },
-      ],
-    },
-  };
-
-  const optionsCount = {
-    responsive: true,
-    interaction: {
-      mode: "index",
-      intersect: false,
-    },
-    stacked: false,
-    plugins: {
-      title: {
-        display: true,
-        text: "See the count of your description created by day",
-      },
-      ChartRough: {
-        roughness: 2,
-        bowing: 2,
-      },
-    },
-
-    scales: {
-      yAxes: [
-        {
-          ticks: {
-            suggestedMin: 0,
-            suggestedMax: 100,
-          },
-        },
-      ],
-    },
-  };
-
-  const optionsCategoryCount = {
-    responsive: true,
-    interaction: {
-      mode: "index",
-      intersect: false,
-    },
-    stacked: false,
-    plugins: {
-      title: {
-        display: true,
-        text: "See the count of your created description by category",
-      },
-      ChartRough: {
-        roughness: 2,
-        bowing: 2,
-      },
-    },
-
-    scales: {
-      yAxes: [
-        {
-          ticks: {
-            suggestedMin: 0,
-            suggestedMax: 100,
-          },
-        },
-      ],
-    },
-  };
-
-  const legend = {
-    display: true,
-    position: "bottom",
-    labels: {
-      fontColor: "#323130",
-      fontSize: 14,
-    },
-  };
-
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12} sx={{ ml: 4, mr: 4 }}>
+      <Grid
+        item
+        xs={12}
+        md={12}
+        sx={{
+          textAlign: "center",
+          justifyContent: "center",
+          alignItems: "center",
+          display: "flex",
+          mt: 4,
+        }}
+      >
         <Button variant="contained" onClick={() => setExpanded(!expanded)} sx={{ mb: 2, textAlign: "center", justifyContent: "center", display: "flex" }}>
           {expanded ? "Hide" : "Show"} Data
         </Button>
@@ -329,18 +270,15 @@ export default function StatsMood({ moods: data }) {
         </Typography>
       </Grid>
       <Grid item xs={12} sx={{ ml: 4, mr: 4 }}>
-
-
-      <Line data={chartDataRate} options={optionsRate} legend={legend} />
+      <Line data={chartDataRate} />
       </Grid>
       <Grid item xs={12} sx={{ ml: 4, mr: 4 }}>
-      <Line data={chartDataCount} options={optionsCount} legend={legend} />
+      <Line data={chartDataCount} />
       </Grid>
       <Grid item xs={12} sx={{ ml: 4, mr: 4 }}>
       <Bar
         data={chartDataCountByCategory}
-        options={optionsCategoryCount}
-        legend={legend}
+      
       />
       </Grid>
 

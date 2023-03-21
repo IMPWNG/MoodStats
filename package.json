@@ -31,6 +31,7 @@
     "date-fns": "^2.29.3",
     "eslint": "8.34.0",
     "eslint-config-next": "13.1.6",
+    "eventsource-parser": "^0.1.0",
     "faker": "^6.6.6",
     "install-peerdeps": "^3.0.3",
     "moment-timezone": "^0.5.40",

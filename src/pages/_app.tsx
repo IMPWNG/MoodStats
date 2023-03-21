@@ -1,59 +1,50 @@
 import { useState, useEffect } from "react";
-import { createBrowserSupabaseClient, Session } from "@supabase/auth-helpers-nextjs";
+import { useRouter } from 'next/router';
+import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import {
   SessionContextProvider,
-  useSupabaseClient,
+  useUser
 } from "@supabase/auth-helpers-react";
 import Layout from "@/components/Layout";
 import { fetcher } from "@/utils/fetcher";
-import useSWR from 'swr';
+import { SWRConfig } from 'swr';
 import moment from "moment-timezone";
 import "../styles/index.css";
 import { AppProps } from "next/app";
 
 moment.tz.setDefault("America/New_York");
 
-
-
 export default function MyApp({
   Component,
   pageProps,
-}: AppProps<{
-  initialSession: Session,
-}>) {
+}: AppProps) {
+  const { push } = useRouter();
+  const user = useUser();
+
+  useEffect(() => {
+    if (user) {
+      push("/");
+    }
+  }, [user]);
+
   const [supabaseClient] = useState(
     createBrowserSupabaseClient()
   );
 
-  const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [user, setUser] = useState(null);
-  const [moods, setMoods] = useState([]);
-  const supabase = useSupabaseClient();
-
   useEffect(() => {
     document.body.classList?.remove("loading");
   }, []);
-
-  const { data, error } = useSWR("/api/mood", fetcher);
-
-  useEffect(() => {
-    if (data) {
-      setMoods(data);
-    } else {
-      console.log("error", error);
-      setMoods([]);
-    }
-  }, [data, error]);
 
   return (
     <SessionContextProvider
       supabaseClient={supabaseClient}
       initialSession={pageProps.initialSession}
     >
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
+      <SWRConfig value={{ fetcher }}>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </SWRConfig>
     </SessionContextProvider>
   );
 }
