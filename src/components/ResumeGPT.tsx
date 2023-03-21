@@ -54,8 +54,9 @@ const ResumeGPT: NextComponentType = () => {
   const handleButtonClick = () => {
     const messageInput = document.getElementById("message-input") as HTMLTextAreaElement;
     if (messageInput) {
-      messageInput.value = getAllMoodsDescription();
-    }
+      messageInput.value = `Give me a resume of my thought in 10lines. Try to categorise each tought and give me a final summary: ${getAllMoodsDescription()} in 10lines`;
+     }
+    
   };
 
 
@@ -168,77 +169,51 @@ const ResumeGPT: NextComponentType = () => {
   }
 
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12} md={12} sx={{ justifyContent: "center", textAlign: "center", mt: -30 }}>
-        <ButtonGroup
-          variant="contained"
-          aria-label="contained primary button group"
-          sx={{
-            justifyContent: "center",
-            textAlign: "center",
-            marginTop: "20px",
-            marginBottom: "20px",
-          }}
-        >
-          <Button
-            sx={{
-              justifyContent: "center",
-              textAlign: "center",
-            }}
-           onClick={handleButtonClick}
+    <div style={{ display: "flex", flexDirection: "column-reverse" }}>
 
-          >
-            Resume your daily mood
-          </Button>
-          <Button>
-            Resume your weekly mood
-          </Button>
-          <Button>
-            Resume your monthly mood
-          </Button>
-          <Button
-            onClick={handleReset}
-            color="error"
-            sx={{
-              justifyContent: "center",
-              textAlign: "center",
-            }}
-          >
-            Clear history
-          </Button>
-        </ButtonGroup>
-      </Grid>
-      <Grid item xs={6} md={6} sx={{ mt: -2 }}>
-        {isLoading
-          ? response.map((item: any, index: number) => {
+      
+      <Grid container spacing={2} style={{ padding: "10px", display: "flex", flexDirection: "column" }}>
+        {isLoading ? (
+          response.map((item: any, index: number) => {
             return (
-              <Grid item xs={6} md={6}
-                key={index}
-                className={`${index % 2 === 0 ? 'bg-blue-500' : 'bg-gray-500'
+              <Grid item xs={12} key={index}>
+              <div
+                className={`chat-message ${index % 2 === 0 ? "bg-blue-500" : "bg-gray-500"
                   } p-3 rounded-lg`}
+                key={index}
               >
                 <p>{item}</p>
+              </div>
               </Grid>
-            )
+            );
           })
-          : response
-            ? response.map((item: string, index: number) => {
-              return (
-                <Grid item xs={12} md={12}
-                  key={index}
-                  className={`${index % 2 === 0 ? 'bg-blue-500' : 'bg-gray-500'
-                    } p-3 rounded-lg`}
-                >
-                  <p>{item}</p>
-                </Grid>
-              )
-            })
-            : null}
+        ) : response ? (
+          response.map((item: string, index: number) => {
+            return (
+              <Grid item xs={12} key={index}>
+              <div
+                className={`chat-message ${index % 2 === 0 ? "bg-blue-500" : "bg-gray-500"
+                  } p-3 rounded-lg`}
+                key={index}
+              >
+                <p>{item}</p>
+              </div>
+              </Grid>
+            );
+          })
+        ) : null}
       </Grid>
-      <Grid item xs={12} md={12} sx={{ justifyContent: "center", textAlign: "center", alignContent: "center", alignItems: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+        }}
+      >
         <form
           onSubmit={handleSubmit}
-          className='fixed bottom-0 w-full md:max-w-3xl bg-gray-700 rounded-md shadow-[0_0_10px_rgba(0,0,0,0.10)] mb-4'
+          className="fixed bottom-0 w-full md:max-w-3xl bg-gray-700 rounded-md shadow-[0_0_10px_rgba(0,0,0,0.10)] mb-4"
         >
           <textarea
             id="message-input"
@@ -249,16 +224,26 @@ const ResumeGPT: NextComponentType = () => {
             className="w-full resize-none bg-transparent outline-none pt-4 pl-4 translate-y-1"
           />
           <Button
+            className="chat-button"
             disabled={isLoading}
-            type='submit'
-            variant='contained'
-            color='primary'
+            type="submit"
+            variant="contained"
+            color="primary"
           >
             {isLoading ? <CircularProgress size={20} /> : "Ask"}
           </Button>
+
+          <Button className="chat-button" onClick={handleButtonClick} variant="contained" color="success">
+            Resume
+          </Button>
+
+          <Button className="chat-button" onClick={handleReset} color="error" variant="contained">
+            Clear
+          </Button>
         </form>
-      </Grid>
-    </Grid>
+      </div>
+    </div>
+
   );
 }
 
