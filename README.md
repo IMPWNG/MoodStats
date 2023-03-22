@@ -1,8 +1,35 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## What is it about ?
 
-## Getting Started
+This application acted like a personal analyst for the user. It allowed the user to enter their personal toughts, rate and categoryze them, then it would analyze the data and give the user a report about their tougths. 
 
-First, run the development server:
+- Number of entries
+- Number of entries per category
+- Number of entries per rating
+- Average rating
+- Average rating per category
+- ...
+
+The user could also see the data in a graphical form, delete entries and edit them.
+
+## AI Implementation
+
+The AI was implemented using ChatGTP API (3.5 turbo). The promps was trained to act like a personal analyst. The user could enter their thoughts and the AI would analyze them and give the user a report about their thoughts.
+
+It also have a pholisophical mode, where the chat give the user a philosophical point of view about their thoughts.
+
+## Screenshots
+
+![Screenshot 1](
+    /assets/Screensho1.png
+    )
+
+
+
+## How to use it ?
+
+The application was built using React and Next.js. The data was stored in a Supabase database. The application was deployed on Vercel.
+
+## How to run it ?
 
 ```bash
 npm run dev
@@ -11,28 +38,3 @@ yarn dev
 # or
 pnpm dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
