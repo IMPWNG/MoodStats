@@ -72,7 +72,7 @@ const ResumeGPT: NextComponentType = () => {
     return moods.map((mood) => mood.category).join("\n");
   };
 
-  const handleButtonClick = () => {
+  const handleButtonClickResume = () => {
     const messageInput = document.getElementById("message-input") as HTMLTextAreaElement;
     if (messageInput) {
       messageInput.value = `  
@@ -93,6 +93,36 @@ const ResumeGPT: NextComponentType = () => {
       `;
     }
   };
+
+  const handleButtonClickImprovment = () => {
+    const messageInput = document.getElementById("message-input") as HTMLTextAreaElement;
+    if (messageInput) {
+      messageInput.value = `  
+      Forget all our precedents prompts. Let's start from scratch.
+      
+      Based on : " ${getAllMoodsDescription()} " that you need to analyse like your a therapist.  
+      
+          Give me only 3 tips to improve my mood. the tips can be anything.
+      `;
+    }
+  };
+
+  const handleButtonClickPhilo = () => {
+    const messageInput = document.getElementById("message-input") as HTMLTextAreaElement;
+    if (messageInput) {
+      messageInput.value = `  
+      Forget all our precedents prompts. Let's start from scratch.
+      
+      Acted like your a philosopher. Baruch Spinoza is a good philosopher to start with.
+
+      Based on the following list of your recent thoughts : " ${getAllMoodsDescription()} "
+      
+      Try to analyse my mood with a philosophical point of view. 
+
+      `;
+    }
+  };
+
 
   const handleEnter = (
     e: React.KeyboardEvent<HTMLTextAreaElement> &
@@ -246,7 +276,7 @@ const ResumeGPT: NextComponentType = () => {
               onKeyDown={handleEnter}
               ref={messageInput}
               className="w-full resize-none bg-transparent outline-none pt-4 pl-4 translate-y-1" />
-            <ButtonGroup variant="contained" color="primary" aria-label="contained primary button group" sx={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+
               <Button
 
                 disabled={isLoading}
@@ -257,15 +287,23 @@ const ResumeGPT: NextComponentType = () => {
               >
                 {isLoading ? <CircularProgress size={20} /> : "Ask"}
               </Button>
+              <Grid item xs={12} sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
 
-              <Button className="chat-button" onClick={handleButtonClick} variant="contained" color="success">
+              <Button className="chat-button" onClick={handleButtonClickResume} variant="contained" color="success">
                 Resume
+              </Button>
+              <Button className="chat-button" onClick={handleButtonClickImprovment} variant="contained" color="success">
+                Get improvement tips
+              </Button>
+              <Button className="chat-button" onClick={handleButtonClickPhilo} variant="contained" color="success">
+               Philosophy state
               </Button>
 
               <Button className="chat-button" onClick={handleReset} color="error" variant="contained">
                 Clear
               </Button>
-            </ButtonGroup>
+              </Grid>
+
           </form>
         </FormControl>
       </Grid></>
