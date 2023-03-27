@@ -1,20 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { NextPage } from "next";
 import { DataGrid } from "@mui/x-data-grid";
 import { Mood } from "@/types/moodTypes";
 import { Card, CardHeader, Grid, Button, TextField, Dialog, DialogTitle, DialogContent, Select, MenuItem, DialogActions, Alert } from "@mui/material";
 import { useUser } from "@supabase/auth-helpers-react";
-import { de } from "date-fns/locale";
+import { useGetMoods } from "@/hooks/useGetMoods";
 
 interface MoodsPropsChange {
   onDelete?: (id: string) => void;
   onModify?: (id: string, description: string, rating: number, category: string) => void;
 }
 
-
 export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) => {
 
-  const [moods, setMoods] = useState<Mood[]>([]);
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState<string>("");
   const [rating, setRating] = useState<string>("0");
@@ -24,62 +22,64 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
   const [oppenAlert, setOppenAlert] = useState<boolean>(false);
 
   const user = useUser();
+  const moods = useGetMoods();
 
-  useEffect(() => {
-    async function getMoods() {
-      try {
-        const response = await fetch("/api/mood");
-        const { data: moods } = await response.json();
-        setMoods(moods as Mood[]);
-      }
-      catch (error) {
-        console.error(error);
-      }
-    }
-    // async function deleteMood(id: string) {
-    //   try {
-    //     const response = await fetch("/api/mood", {
-    //       method: "DELETE",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //       body: JSON.stringify({
-    //         id,
-    //       }),
-    //     });
-    //     const { data: moods } = await response.json();
-    //     onDelete(id);
-    //     setMoods(moods as Mood[]);
 
-    //   }
-    //   catch (error) {
-    //     console.error(error);
-    //   }
-    // }
-    // async function modifyMood(id: string, description: string, rating: number, category: string) {
-    //   try {
-    //     const response = await fetch("/api/mood", {
-    //       method: "PUT",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //       body: JSON.stringify({
-    //         id,
-    //         description,
-    //         rating,
-    //         category,
-    //       }),
-    //     });
-    //     const { data: moods } = await response.json();
-    //     onModify(id, description, rating, category);
-    //     setMoods(moods as Mood[]);
-    //   }
-    //   catch (error) {
-    //     console.error(error);
-    //   }
-    // }
-    getMoods();
-  }, []);
+  // useEffect(() => {
+  //   async function getMoods() {
+  //     try {
+  //       const response = await fetch("/api/mood");
+  //       const { data: moods } = await response.json();
+  //       setMoods(moods as Mood[]);
+  //     }
+  //     catch (error) {
+  //       console.error(error);
+  //     }
+  //   }
+  //   async function deleteMood(id: string) {
+  //     try {
+  //       const response = await fetch("/api/mood", {
+  //         method: "DELETE",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           id,
+  //         }),
+  //       });
+  //       const { data: moods } = await response.json();
+  //       onDelete(id);
+  //       setMoods(moods as Mood[]);
+
+  //     }
+  //     catch (error) {
+  //       console.error(error);
+  //     }
+  //   }
+  //   async function modifyMood(id: string, description: string, rating: number, category: string) {
+  //     try {
+  //       const response = await fetch("/api/mood", {
+  //         method: "PUT",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           id,
+  //           description,
+  //           rating,
+  //           category,
+  //         }),
+  //       });
+  //       const { data: moods } = await response.json();
+  //       onModify(id, description, rating, category);
+  //       setMoods(moods as Mood[]);
+  //     }
+  //     catch (error) {
+  //       console.error(error);
+  //     }
+  //   }
+  //   getMoods();
+  // }, []);
 
   const deleteMood = async (id: string) => {
     try {
@@ -94,7 +94,6 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
       });
       const { data: moods } = await response.json();
       onDelete(id);
-      setMoods(moods as Mood[]);
     }
     catch (error) {
       console.error(error);
@@ -117,7 +116,6 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
       });
       const { data: moods } = await response.json();
       onModify(id, description, rating, category);
-      setMoods(moods as Mood[]);
     }
     catch (error) {
       console.error(error);
@@ -156,7 +154,6 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
     });
     const { data: moods } = await response.json();
     onDelete(moods[0].id);
-    setMoods(moods as Mood[]);
     setOpen(false);
     window.location.reload();
   };
@@ -449,7 +446,7 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      deleteMood(params.row.id);
+                      // deleteMood(params.row.id);
                       window.location.reload();
 
      
@@ -469,12 +466,12 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
                       e.preventDefault();
                       e.stopPropagation();
                       handleOpenDialog();
-                      onModify(
-                        params.row.id,
-                        params.row.description,
-                        params.row.rating,
-                        params.row.category
-                      );
+                      // onModify(
+                      //   params.row.id,
+                      //   params.row.description,
+                      //   params.row.rating,
+                      //   params.row.category
+                      // );
                     }}
                 
                   >
