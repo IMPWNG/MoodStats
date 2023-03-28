@@ -9,7 +9,7 @@ import Layout from "@/components/Layout";
 import { fetcher } from "@/utils/fetcher";
 import { SWRConfig } from 'swr';
 import moment from "moment-timezone";
-import "../styles/index.css";
+import "../styles/globals.css";
 import { AppProps } from "next/app";
 
 moment.tz.setDefault("America/New_York");
