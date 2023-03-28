@@ -139,7 +139,7 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
         rating,
         category,
       }),
-      
+
     });
 
 
@@ -157,7 +157,7 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
     setOpen(false);
     window.location.reload();
   };
-   
+
 
   const formatDateTime = (dateTimeString = "") => {
     const date = new Date(dateTimeString);
@@ -271,220 +271,209 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
     : [];
 
   return (
-    <Grid container spacing={2}>
-    <Grid
-      item
-      xs={12}
-      md={12}
-      sx={{
-        textAlign: "center",
-        justifyContent: "center",
-        alignItems: "center",
-        display: "flex",
-        mt: 4,
-      }}
-    >
-      <Card sx={{ width: 300, height: 400, borderRadius: 10, boxShadow: 5 }}>
-        {getMostUsedCategory(moods) ? (
-          <CardHeader
-            title="Most used category"
-            subheader={getMostUsedCategory(moods)}
-            sx={{
-              textAlign: "center",
-              "& .MuiCardHeader-subheader": {
-                color: "green",
-                fontSize: "1.5rem",
-              },
-            }} />
-        ) : (
-          "Loading..."
-        )}{" "}
-        {getLessUsedCategory(moods) ? (
-          <CardHeader
-            title="Less used category"
-            subheader={getLessUsedCategory(moods)}
-            sx={{
-              textAlign: "center",
-
-              "& .MuiCardHeader-subheader": {
-                color: "red",
-                fontSize: "1.5rem",
-              },
-            }} />
-        ) : (
-          "Loading..."
-        )}{" "}
-        <CardHeader
-          title="Average Rating"
-          subheader={`${averageRating.toFixed(2)} / 10`}
-          sx={{
-            textAlign: "center",
-
-            "& .MuiCardHeader-subheader": {
-              color: "blue",
-              fontSize: "1.5rem",
-            },
-          }} />
-        <CardHeader
-          title="Total entries this year"
-          subheader={countMoodsYear(moods)}
-          sx={{
-            textAlign: "center",
-
-            "& .MuiCardHeader-subheader": {
-              color: "blue",
-              fontSize: "1.5rem",
-            },
-          }} />
-      </Card>
-    </Grid>
-    <Grid
-      item
-      xs={12}
-      md={12}
-      sx={{
-        textAlign: "center",
-        justifyContent: "center",
-        alignItems: "center",
-        display: "flex",
-        mt: 4,
-      }}
-    >
-    <div
-      style={{
-        height: 700,
-        margin: "auto",
-        marginLeft: 20,
-        marginRight: 20,
-        borderRadius: 10,
-        padding: 10,
-        width: "80%",
-      }}
-    >
-        <DataGrid
-          rows={rowsMood || []}
-          sx={{
-            backgroundColor: "white",
-            border: 1,
-            borderColor: "grey.500",
-            borderRadius: 1,
-            "& .MuiDataGrid-columnHeaderWrapper": {
-              backgroundColor: "red",
-              border: 1,
-              borderColor: "red",
-              borderRadius: 10,
-            },
-            m: 1,
-            "& .MuiDataGrid-columnHeaderTitle": {
-              color: "black",
-              fontSize: "1.2rem",
-            },
-            "& .MuiDataGrid-cell": {
-              color: "black",
-              justifyContent: "center",
-              width: "100%",
-              alignContent: "center",
-              alignItems: "center",
-            },
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: "white",
-            },
-            "& .MuiDataGrid-row": {
-              backgroundColor: "white",
-              justifyContent: "center",
-            },
-          }}
-          columns={[
-            {
-              field: "id",
-              headerName: "ID",
-              width: 70,
-              headerAlign: "center",
-              disableColumnMenu: true,
-            },
-            {
-              field: "rating",
-              headerName: "Rating",
-              headerAlign: "center",
-              width: 130,
-            },
-            {
-              field: "category",
-              headerName: "Category",
-              headerAlign: "center",
-              width: 130,
-            },
-            {
-              field: "description",
-              headerName: "Description",
-              headerAlign: "center",
-              width: 250,
-              maxWidth: 300,
-              disableColumnMenu: true,
-            },
-            {
-              field: "created_at",
-              headerName: "Created At",
-              headerAlign: "center",
-              width: 200,
-              disableColumnMenu: true,
-
-            },
-            {
-              field: "action",
-              headerName: "Action",
-              headerAlign: "center",
-              width: 150,
-              disableColumnMenu: true,
-              renderCell: (params: any) => (
-                <strong>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    style={{ marginLeft: 16 }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      // deleteMood(params.row.id);
-                      window.location.reload();
-
+    <>
      
-                    }}
+        <Card sx={{ width: 300, height: 400, borderRadius: 10, boxShadow: 5 }}>
+          {getMostUsedCategory(moods) ? (
+            <CardHeader
+              title="Most used category"
+              subheader={getMostUsedCategory(moods)}
+              sx={{
+                textAlign: "center",
+                "& .MuiCardHeader-subheader": {
+                  color: "green",
+                  fontSize: "1.5rem",
+                },
+              }} />
+          ) : (
+            "Loading..."
+          )}{" "}
+          {getLessUsedCategory(moods) ? (
+            <CardHeader
+              title="Less used category"
+              subheader={getLessUsedCategory(moods)}
+              sx={{
+                textAlign: "center",
 
-                
-                  >
-                   Delete
-                  </Button>
-                  <Button
+                "& .MuiCardHeader-subheader": {
+                  color: "red",
+                  fontSize: "1.5rem",
+                },
+              }} />
+          ) : (
+            "Loading..."
+          )}{" "}
+          <CardHeader
+            title="Average Rating"
+            subheader={`${averageRating.toFixed(2)} / 10`}
+            sx={{
+              textAlign: "center",
 
-                    variant="contained"
-                    color="secondary"
-                    size="small"
-                    style={{ marginLeft: 16 }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleOpenDialog();
-                      // onModify(
-                      //   params.row.id,
-                      //   params.row.description,
-                      //   params.row.rating,
-                      //   params.row.category
-                      // );
-                    }}
-                
-                  >
-                    Edit
-                  </Button>
-                </strong>
-              ),
+              "& .MuiCardHeader-subheader": {
+                color: "blue",
+                fontSize: "1.5rem",
+              },
+            }} />
+          <CardHeader
+            title="Total entries this year"
+            subheader={countMoodsYear(moods)}
+            sx={{
+              textAlign: "center",
 
-            }
-          ]}
-          checkboxSelection
-          density="comfortable" />
-      </div>
+              "& .MuiCardHeader-subheader": {
+                color: "blue",
+                fontSize: "1.5rem",
+              },
+            }} />
+        </Card>
+     
+      <Grid
+        item
+        xs={12}
+        md={12}
+        sx={{
+          textAlign: "center",
+          justifyContent: "center",
+          alignItems: "center",
+          display: "flex",
+          mt: 4,
+        }}
+      >
+        <div
+          style={{
+            height: 700,
+            margin: "auto",
+            marginLeft: 20,
+            marginRight: 20,
+            borderRadius: 10,
+            padding: 10,
+            width: "80%",
+          }}
+        >
+          <DataGrid
+            rows={rowsMood || []}
+            sx={{
+              backgroundColor: "white",
+              border: 1,
+              borderColor: "grey.500",
+              borderRadius: 1,
+              "& .MuiDataGrid-columnHeaderWrapper": {
+                backgroundColor: "red",
+                border: 1,
+                borderColor: "red",
+                borderRadius: 10,
+              },
+              m: 1,
+              "& .MuiDataGrid-columnHeaderTitle": {
+                color: "black",
+                fontSize: "1.2rem",
+              },
+              "& .MuiDataGrid-cell": {
+                color: "black",
+                justifyContent: "center",
+                width: "100%",
+                alignContent: "center",
+                alignItems: "center",
+              },
+              "& .MuiDataGrid-columnHeaders": {
+                backgroundColor: "white",
+              },
+              "& .MuiDataGrid-row": {
+                backgroundColor: "white",
+                justifyContent: "center",
+              },
+            }}
+            columns={[
+              {
+                field: "id",
+                headerName: "ID",
+                width: 70,
+                headerAlign: "center",
+                disableColumnMenu: true,
+              },
+              {
+                field: "rating",
+                headerName: "Rating",
+                headerAlign: "center",
+                width: 130,
+              },
+              {
+                field: "category",
+                headerName: "Category",
+                headerAlign: "center",
+                width: 130,
+              },
+              {
+                field: "description",
+                headerName: "Description",
+                headerAlign: "center",
+                width: 250,
+                maxWidth: 300,
+                disableColumnMenu: true,
+              },
+              {
+                field: "created_at",
+                headerName: "Created At",
+                headerAlign: "center",
+                width: 200,
+                disableColumnMenu: true,
+
+              },
+              {
+                field: "action",
+                headerName: "Action",
+                headerAlign: "center",
+                width: 150,
+                disableColumnMenu: true,
+                renderCell: (params: any) => (
+                  <strong>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      style={{ marginLeft: 16 }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // deleteMood(params.row.id);
+                        window.location.reload();
+
+
+                      }}
+
+
+                    >
+                      Delete
+                    </Button>
+                    <Button
+
+                      variant="contained"
+                      color="secondary"
+                      size="small"
+                      style={{ marginLeft: 16 }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleOpenDialog();
+                        // onModify(
+                        //   params.row.id,
+                        //   params.row.description,
+                        //   params.row.rating,
+                        //   params.row.category
+                        // );
+                      }}
+
+                    >
+                      Edit
+                    </Button>
+                  </strong>
+                ),
+
+              }
+            ]}
+            checkboxSelection
+            density="comfortable" />
+        </div>
         <Dialog open={dialogOpen} onClose={handleCloseDialog}>
           <DialogTitle>Modify Mood</DialogTitle>
           <DialogContent>
@@ -531,8 +520,7 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
             </form>
           </DialogContent>
         </Dialog>
-</Grid>      
-      
       </Grid>
+    </>
   );
 }

@@ -1,37 +1,33 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { GeneralForm } from "@/components/GeneralForm";
-import {
-  useSession,
-} from "@supabase/auth-helpers-react";
-import { Grid, Typography } from "@mui/material";
+import { useSession } from "@supabase/auth-helpers-react";
 import { NextPage } from "next";
 
 const Home: NextPage = () => {
-
   const session = useSession();
 
+  useEffect(() => {
+    document.body.classList.add("bg-gray-100");
+    return () => {
+      document.body.classList.remove("bg-gray-100");
+    };
+  }, []);
+
   return (
-    <Grid container justifyContent="center" alignItems="center" sx={{ height: '80vh' }}>
-        {!session ? (
- 
-
-              <><div className="flex flex-col items-center justify-center min-h-screen py-2 -mt-56 text-center sm:py-0">
-          <div className="flex flex-col items-center justify-center w-full px-4 pt-16 pb-12 text-center bg-white border-2 border-gray-300 rounded-md shadow-md sm:px-6 sm:pt-12 sm:pb-16 sm:shadow-lg sm:max-w-md sm:w-full sm:mx-auto sm:mt-0 sm:mb-0">
-            <div className="flex flex-col items-center justify-center w-full">
-              <p className="text-2xl font-bold text-gray-900">You are not dddddsigned in</p>
-
-
-            </div>
+    <div className="flex flex-col items-center justify-center min-h-screen py-4 sm:py-0">
+      {!session ? (
+        <div className="flex flex-col items-center justify-center w-full max-w-md px-4 pt-16 pb-12 bg-white border-2 border-gray-300 rounded-md shadow-md sm:px-6 sm:pt-12 sm:pb-16 sm:shadow-lg">
+          <div className="flex flex-col items-center justify-center w-full">
+            <p className="text-2xl font-bold text-gray-900">You are not logged in</p>
           </div>
-
-
-        </div></>
-
-        ) : (
-          <GeneralForm />
-        )}
-      </Grid>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center w-full max-w-md px-4 pt-16 pb-12 sm:px-6 sm:pt-12 sm:pb-16">
+        <GeneralForm />
+        </div>
+      )}
+    </div>
   );
-}
+};
 
 export default Home;

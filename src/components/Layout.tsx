@@ -1,13 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
-
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import { Grid } from "@mui/material";
+import { useState } from "react";
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -20,9 +14,20 @@ const pageMeta = {
 };
 
 export default function Layout({ children }: LayoutProps) {
-
   const supabaseClient = useSupabaseClient<any>();
-  const user  = useUser();
+  const user = useUser();
+  const [openMenu, setOpenMenu] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(false);
+
+  const handleLogout = async () => {
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) console.log("Error logging out:", error.message);
+  };
+
+  const handleMenu = () => {
+    setOpenMenu(!openMenu);
+  };
+
 
   return (
     <>
@@ -36,72 +41,104 @@ export default function Layout({ children }: LayoutProps) {
         <meta property="og:title" content={pageMeta.title} />
         <meta property="og:image" content={pageMeta.image} />
       </Head>
-      <Grid container>
-        <Grid item xs={12}>
-          { user ? (
-            <Box sx={{ flexGrow: 1 }}>
-              <AppBar
-                position="static"
-                color="default"
-                elevation={0}
-                sx={{ borderBottom: (theme) => `1px solid ${theme.palette.divider}`, background: "linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)", border: 0, color: 'white', boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)' }}
-              >
-                <Toolbar sx={{ flexWrap: 'wrap', justifyContent: "center", padding: "1rem" }}>
-                  <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1, marginTop: "1rem", marginBottom: "1rem" }}>
-                    <Link href="/" style={{ textDecoration: "none", color: "black" }}>
-                      Mood Stats App
+      <header>
+        <nav className="bg-gradient-to-r from-pink-400 via-red-500 to-yellow-500 border-b border-gray-300">
+          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div>
+              <Link href="/">
+                <p className="text-black font-bold text-xl">
+                  Mood Stats App
+                </p>
+              </Link>
+            </div>
+            <div>
+              {
+                user ? (
+                  <nav className="hidden md:flex items-center">
+                    <Link href="/list_mood">
+                      <p className="text-black mx-4 hover:text-gray-700">
+                        View
+                      </p>
                     </Link>
-                  </Typography>
-                  <nav>
-                    <Link
-                      href="/list_mood"
-                      style={{ textDecoration: "none", color: "black", marginRight: "1.5rem", marginTop: "1rem", marginBottom: "1rem", marginLeft: "1.5rem" }}
-                    >
-                      View
+                    <Link href="/graph_mood">
+                      <p className="text-black mx-4 hover:text-gray-700">
+                        Stats
+                      </p>
                     </Link>
-                    <Link
-                      href="/graph_mood"
-                      style={{ textDecoration: "none", color: "black", marginRight: "1.5rem", marginTop: "1rem", marginBottom: "1rem", marginLeft: "1.5rem" }}
-                    >
-                      Stats
+                    <Link href="/resume_mood">
+                      <p className="text-black mx-4 hover:text-gray-700">
+                        Ai - Resume
+                      </p>
                     </Link>
-                    <Link
-                      href="/resume_mood"
-                      style={{ textDecoration: "none", color: "black", marginRight: "1.5rem", marginTop: "1rem", marginBottom: "1rem", marginLeft: "1.5rem" }}
+                    <button
+                      onClick={handleLogout}
+                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
                     >
-                      Ai - Resume
+                      Log Out
+                    </button>
+                  </nav>
+                ) : (
+                  <nav className="hidden md:flex items-center">
+                    <Link href="/signin">
+                      <p className="text-black mx-4 hover:text-gray-700">
+                        Sign In
+                      </p>
                     </Link>
                   </nav>
-                  <Grid item xs={12} sm={6} md={4} sx={{ justifyContent: "center", display: "flex", marginTop: "1rem" }}>
-                  {
-                    user ? (
-                      <Button href="#" variant="contained" sx={{ my: 1, mx: 1.5 }} onClick={() => supabaseClient.auth.signOut()} color="error">
-                        Log Out
-                      </Button>
-                    ) : (
-                      <Button href="#" variant="contained" sx={{ my: 1, mx: 1.5 }}>
-                        Sign In
-                      </Button>
-                    )
-                  }
-                  </Grid>
-                </Toolbar>
-              </AppBar>
-            </Box>
-          ) : (
-            <Link href="/signin">
-              <Button variant="contained" color="primary">
-                Sign in
-              </Button>
-            </Link>
-          )}
-        </Grid>
-      </Grid>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <main id="skip">{children}</main>
-        </Grid>
-      </Grid>
+                )
+              }
+              <div className="flex md:hidden" onClick={handleMenu}>
+                <button type="button" className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" id="options-menu" aria-haspopup="true" aria-expanded="true" onClick={() => setOpenDropdown(!openDropdown)}>
+
+                  <svg className="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" d="M2.293 7.293a1 1 0 011.414 0L10 13.586l6.293-6.293a1 1 0 011.414 1.414l-7 7a1 1 0 01-1.414 0l-7-7a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+              <div className={`md:hidden ${openMenu ? "block" : "hidden"}`}>
+                <div className={`${openDropdown ? "block" : "hidden"} origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none`} role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                  <Link href="/list_mood">
+                    <p className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">View</p>
+                  </Link>
+                  <Link href="/graph_mood">
+                    <p className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">Stats</p>
+                  </Link>
+                  <Link href="/resume_mood">
+                    <p className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">Ai - Resume</p>
+                  </Link>
+                  <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">Log Out</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </header>
+      <main>
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex flex-col items-center justify-center  bg-white border-2 border-gray-300 rounded-md shadow-md sm:px-6 sm:pt-12 sm:pb-16 sm:shadow-lg">
+            <div id="content">{children}</div>
+          </div>
+        </div>
+      </main>
+      <footer className="bg-gray-100 border-t border-gray-300">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div>
+            <p className="text-sm text-gray-600">
+              &copy; 2021 Mood Stats App. All rights reserved.
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">
+              <a
+                href=""
+                className="text-black hover:text-gray-700"
+              >
+                Made with ❤️ by IMPWNG
+              </a>
+            </p>
+          </div>
+        </div>
+      </footer>
     </>
   );
 }

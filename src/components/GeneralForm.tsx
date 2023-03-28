@@ -182,20 +182,10 @@ export const GeneralForm: NextPage = () => {
   };
 
   return (
-    <Grid container spacing={2}>
-      <Grid
-        item
-        xs={12}
-        md={12}
-        sx={{
-          textAlign: "center",
-          justifyContent: "center",
-          alignItems: "center",
-          display: "flex",
-          mt: 4,
-        }}
-      >
-        <Box sx={{ width: "100%", minWidth: 400, p: 2 }}>
+
+
+      
+        <>
           <Stepper activeStep={activeStep}>
             {steps.map((label, index) => {
               const stepProps = {};
@@ -818,8 +808,8 @@ export const GeneralForm: NextPage = () => {
               </Grid>
             </Grid>
           )}
-        </Box>
-      </Grid>
-    </Grid>
+        </>
+
+
   );
 }
