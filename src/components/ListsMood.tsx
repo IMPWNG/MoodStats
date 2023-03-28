@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useReducer, JSXElementConstructor, ReactElement, ReactFragment } from "react";
 import { NextPage } from "next";
 import { Mood } from "@/types/moodTypes";
 import { Card, CardHeader, Grid, Button, TextField, Dialog, DialogTitle, DialogContent, Select, MenuItem, DialogActions, Alert, CardContent } from "@mui/material";
 import { useUser } from "@supabase/auth-helpers-react";
-import { useGetMoods } from "@/hooks/useGetMoods";
+import { useMoods } from "@/hooks/useMoods";
 
 interface MoodsPropsChange {
   onDelete?: (id: number) => void;
@@ -11,17 +11,21 @@ interface MoodsPropsChange {
 }
 
 export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) => {
-
   const [open, setOpen] = useState(false);
-  const [description, setDescription] = useState<string>("");
-  const [rating, setRating] = useState<number>(0);
-  const [category, setCategory] = useState<string>("");
-  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [mood, setMood] = useReducer(
+    (prev: any, next: any) => ({ ...prev, ...next }),
+    {
+      id: 0,
+      description: "",
+      rating: 0,
+      category: "",
+    }
+  );
   const [categories, setCategories] = useState<string[]>([]);
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [oppenAlert, setOppenAlert] = useState<boolean>(false);
 
-  const user = useUser();
-  const moods = useGetMoods();
+  const moods = useMoods();
 
 
   // useEffect(() => {
@@ -125,6 +129,7 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const { description, rating, category } = e.currentTarget;
     if (rating > 10) {
       alert("Rating cannot be more than 10");
       return;
@@ -141,7 +146,6 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
       }),
 
     });
-
 
     const response = await fetch("/api/mood", {
       method: "DELETE",
@@ -326,8 +330,8 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
             },
           }} />
       </Card>
-      
-      
+
+
       <div className="flex flex-col items-center justify-center">
         <table className="order-separate border border-slate-500 text-center">
           <thead>
@@ -369,9 +373,7 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
                       e.preventDefault();
                       e.stopPropagation();
                       handleOpenDialog();
-                      setDescription(mood.description);
-                      setRating(mood.rating);
-                      setCategory(mood.category);
+
                       modifyMood(
                         mood.id,
                         mood.description,
@@ -402,7 +404,6 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
           </tbody>
         </table>
       </div>
-
       <Dialog open={dialogOpen} onClose={handleCloseDialog}>
         <DialogTitle>Modify Mood</DialogTitle>
         <DialogContent>
@@ -414,8 +415,8 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
               label="Description"
               type="text"
               fullWidth
-              value={description}
-              onChange={(e) => setDescription(e.target.value)} />
+              value={mood.description}
+              onChange={(e) => mood.description = e.target.value} />
             <TextField
               autoFocus
               margin="dense"
@@ -423,25 +424,22 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
               label="Rating"
               type="number"
               fullWidth
-              value={rating}
-              onChange={(e) => setRating(parseInt(e.target.value))}
+              value={mood.rating}
+              onChange={(e) => mood.rating = e.target.value}
             />
             <Select
               labelId="category"
               id="category"
-              value={category}
+              value={mood.category}
               label="Category"
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => mood.category = e.target.value}
             >
-             {categories.map((category) => (
-                
+              {categories.map((category) => (
                 <MenuItem value={category}>{category}</MenuItem>
               ))}
             </Select>
-
             <DialogActions>
               <Button onClick={handleCloseDialog}>Cancel</Button>
-
               <Button type="submit">Save</Button>
             </DialogActions>
           </form>

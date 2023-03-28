@@ -1,7 +1,7 @@
 import { Mood } from "@/types/moodTypes";
 import { useState, useEffect } from "react";
 
-export const useGetMoods = () => {
+export const useMoods = () => {
     const [moods, setMoods] = useState<Mood[]>([]);
 
     useEffect(() => {
