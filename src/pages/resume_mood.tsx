@@ -1,7 +1,8 @@
 import ResumeGPT from "@/components/ResumeGPT";
-import { Grid, Typography } from "@mui/material";
+import { Grid, Typography, Button } from "@mui/material";
 import { useSession } from "@supabase/auth-helpers-react";
 import { NextPage } from "next";
+import Link from "next/link";
 
 const ResumerMood: NextPage = () => {
 
@@ -13,13 +14,13 @@ const ResumerMood: NextPage = () => {
         <Grid container justifyContent="center" alignItems="center" spacing={2}>
           <Grid item>
             <Typography variant="h4" align="center">
-              You are not signed in
+              You are not logged
             </Typography>
-          </Grid>
-          <Grid item>
-            <Typography variant="body1" align="center">
-              Please sign in to access this page.
-            </Typography>
+            <Link href="/signin" passHref style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+              <Button variant="contained" color="primary" sx={{ color: 'white' }}>
+                Signin
+              </Button>
+            </Link>
           </Grid>
         </Grid>
       ) : (

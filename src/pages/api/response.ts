@@ -23,7 +23,8 @@ export default async function handler(request: Request) {
     messages: [
       {
         role: "user",
-        content: `The following is an analyse between a personal analyst and you that need somenone to give me details about your thougts based on the following message: ${message} and the following is the response from the analyst:`,} 
+        content: message,
+      },
     ],
     temperature: 0.5,
     top_p: 1,

@@ -1,21 +1,20 @@
 import { useState } from "react";
 import { NextPage } from "next";
-import { DataGrid } from "@mui/x-data-grid";
 import { Mood } from "@/types/moodTypes";
-import { Card, CardHeader, Grid, Button, TextField, Dialog, DialogTitle, DialogContent, Select, MenuItem, DialogActions, Alert } from "@mui/material";
+import { Card, CardHeader, Grid, Button, TextField, Dialog, DialogTitle, DialogContent, Select, MenuItem, DialogActions, Alert, CardContent } from "@mui/material";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useGetMoods } from "@/hooks/useGetMoods";
 
 interface MoodsPropsChange {
-  onDelete?: (id: string) => void;
-  onModify?: (id: string, description: string, rating: number, category: string) => void;
+  onDelete?: (id: number) => void;
+  onModify?: (id: number, description: string, rating: number, category: string) => void;
 }
 
 export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) => {
 
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState<string>("");
-  const [rating, setRating] = useState<string>("0");
+  const [rating, setRating] = useState<number>(0);
   const [category, setCategory] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [categories, setCategories] = useState<string[]>([]);
@@ -81,7 +80,7 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
   //   getMoods();
   // }, []);
 
-  const deleteMood = async (id: string) => {
+  const deleteMood = async (id: number) => {
     try {
       const response = await fetch("/api/mood", {
         method: "DELETE",
@@ -100,7 +99,7 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
     }
   }
 
-  const modifyMood = async (id: string, description: string, rating: number, category: string) => {
+  const modifyMood = async (id: number, description: string, rating: number, category: string) => {
     try {
       const response = await fetch("/api/mood", {
         method: "PUT",
@@ -116,6 +115,7 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
       });
       const { data: moods } = await response.json();
       onModify(id, description, rating, category);
+
     }
     catch (error) {
       console.error(error);
@@ -125,7 +125,7 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (rating > "10") {
+    if (rating > 10) {
       alert("Rating cannot be more than 10");
       return;
     }
@@ -149,11 +149,11 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        id: moodsTop[0].id,
+        id: moodsTop[0]?.id,
       }),
     });
     const { data: moods } = await response.json();
-    onDelete(moods[0].id);
+    onDelete(moods[0]?.id);
     setOpen(false);
     window.location.reload();
   };
@@ -241,8 +241,8 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
       return 0;
     }
 
-    const ratings = moods.map((mood: { rating: any; }) => mood.rating);
-    const sum = ratings.reduce((sum: any, rating: any) => sum + rating, 0);
+    const ratings = moods.map((mood: { rating: number; }) => mood.rating);
+    const sum = ratings.reduce((sum: number, rating: number) => sum + rating, 0);
     const averageRating = sum / ratings.length;
     return averageRating;
   };
@@ -271,256 +271,183 @@ export const ListsMoods: NextPage<MoodsPropsChange> = ({ onDelete, onModify }) =
     : [];
 
   return (
+
     <>
-     
-        <Card sx={{ width: 300, height: 400, borderRadius: 10, boxShadow: 5 }}>
-          {getMostUsedCategory(moods) ? (
-            <CardHeader
-              title="Most used category"
-              subheader={getMostUsedCategory(moods)}
-              sx={{
-                textAlign: "center",
-                "& .MuiCardHeader-subheader": {
-                  color: "green",
-                  fontSize: "1.5rem",
-                },
-              }} />
-          ) : (
-            "Loading..."
-          )}{" "}
-          {getLessUsedCategory(moods) ? (
-            <CardHeader
-              title="Less used category"
-              subheader={getLessUsedCategory(moods)}
-              sx={{
-                textAlign: "center",
-
-                "& .MuiCardHeader-subheader": {
-                  color: "red",
-                  fontSize: "1.5rem",
-                },
-              }} />
-          ) : (
-            "Loading..."
-          )}{" "}
+      <Card sx={{ width: 300, height: 400, mb: 5, borderRadius: 2, boxShadow: 2 }}>
+        {getMostUsedCategory(moods) ? (
           <CardHeader
-            title="Average Rating"
-            subheader={`${averageRating.toFixed(2)} / 10`}
+            title="Most used category"
+            subheader={getMostUsedCategory(moods)}
+            sx={{
+              textAlign: "center",
+              "& .MuiCardHeader-subheader": {
+                color: "green",
+                fontSize: "1.5rem",
+              },
+            }} />
+        ) : (
+          "Loading..."
+        )}{" "}
+        {getLessUsedCategory(moods) ? (
+          <CardHeader
+            title="Less used category"
+            subheader={getLessUsedCategory(moods)}
             sx={{
               textAlign: "center",
 
               "& .MuiCardHeader-subheader": {
-                color: "blue",
+                color: "red",
                 fontSize: "1.5rem",
               },
             }} />
-          <CardHeader
-            title="Total entries this year"
-            subheader={countMoodsYear(moods)}
-            sx={{
-              textAlign: "center",
+        ) : (
+          "Loading..."
+        )}{" "}
+        <CardHeader
+          title="Average Rating"
+          subheader={`${averageRating.toFixed(2)} / 10`}
+          sx={{
+            textAlign: "center",
 
-              "& .MuiCardHeader-subheader": {
-                color: "blue",
-                fontSize: "1.5rem",
-              },
-            }} />
-        </Card>
-     
-      <Grid
-        item
-        xs={12}
-        md={12}
-        sx={{
-          textAlign: "center",
-          justifyContent: "center",
-          alignItems: "center",
-          display: "flex",
-          mt: 4,
-        }}
-      >
-        <div
-          style={{
-            height: 700,
-            margin: "auto",
-            marginLeft: 20,
-            marginRight: 20,
-            borderRadius: 10,
-            padding: 10,
-            width: "80%",
-          }}
-        >
-          <DataGrid
-            rows={rowsMood || []}
-            sx={{
-              backgroundColor: "white",
-              border: 1,
-              borderColor: "grey.500",
-              borderRadius: 1,
-              "& .MuiDataGrid-columnHeaderWrapper": {
-                backgroundColor: "red",
-                border: 1,
-                borderColor: "red",
-                borderRadius: 10,
-              },
-              m: 1,
-              "& .MuiDataGrid-columnHeaderTitle": {
-                color: "black",
-                fontSize: "1.2rem",
-              },
-              "& .MuiDataGrid-cell": {
-                color: "black",
-                justifyContent: "center",
-                width: "100%",
-                alignContent: "center",
-                alignItems: "center",
-              },
-              "& .MuiDataGrid-columnHeaders": {
-                backgroundColor: "white",
-              },
-              "& .MuiDataGrid-row": {
-                backgroundColor: "white",
-                justifyContent: "center",
-              },
-            }}
-            columns={[
-              {
-                field: "id",
-                headerName: "ID",
-                width: 70,
-                headerAlign: "center",
-                disableColumnMenu: true,
-              },
-              {
-                field: "rating",
-                headerName: "Rating",
-                headerAlign: "center",
-                width: 130,
-              },
-              {
-                field: "category",
-                headerName: "Category",
-                headerAlign: "center",
-                width: 130,
-              },
-              {
-                field: "description",
-                headerName: "Description",
-                headerAlign: "center",
-                width: 250,
-                maxWidth: 300,
-                disableColumnMenu: true,
-              },
-              {
-                field: "created_at",
-                headerName: "Created At",
-                headerAlign: "center",
-                width: 200,
-                disableColumnMenu: true,
+            "& .MuiCardHeader-subheader": {
+              color: "blue",
+              fontSize: "1.5rem",
+            },
+          }} />
+        <CardHeader
+          title="Total entries this year"
+          subheader={countMoodsYear(moods)}
+          sx={{
+            textAlign: "center",
 
-              },
-              {
-                field: "action",
-                headerName: "Action",
-                headerAlign: "center",
-                width: 150,
-                disableColumnMenu: true,
-                renderCell: (params: any) => (
-                  <strong>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      style={{ marginLeft: 16 }}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        // deleteMood(params.row.id);
-                        window.location.reload();
+            "& .MuiCardHeader-subheader": {
+              color: "blue",
+              fontSize: "1.5rem",
+            },
+          }} />
+      </Card>
+      
+      
+      <div className="flex flex-col items-center justify-center">
+        <table className="order-separate border border-slate-500 text-center">
+          <thead>
+            <tr>
+              <th scope="col" className="border border-slate-500 text-center">
+                Rating
+              </th>
+              <th scope="col" className="border border-slate-500 text-center">
+                Category
+              </th>
+              <th scope="col" className="border border-slate-500 text-center">
+                Description
+              </th>
+              <th scope="col" className="border border-slate-500 text-center">
+                Date
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rowsMood.map((mood) => (
+              <tr key={mood.id}>
+                <td className="border border-slate-700 text-center">
+                  {mood.rating}
+                </td>
+                <td className="border border-slate-700 text-center">
+                  {mood.category}
+                </td>
+                <td className="border border-slate-700 text-center">
+                  {mood.description}
+                </td>
+                <td className="border border-slate-700 text-center">
+                  {mood.created_at}
+                </td>
+                <td className="border border-slate-700 text-center">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleOpenDialog();
+                      setDescription(mood.description);
+                      setRating(mood.rating);
+                      setCategory(mood.category);
+                      modifyMood(
+                        mood.id,
+                        mood.description,
+                        mood.rating,
+                        mood.category
+                      )
+                    }}
+                  >
+                    Modify
+                  </Button>
+                </td>
+                <td className="border border-slate-700 text-center">
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      deleteMood(mood.id);
+                      window.location.reload();
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
+      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+        <DialogTitle>Modify Mood</DialogTitle>
+        <DialogContent>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="description"
+              label="Description"
+              type="text"
+              fullWidth
+              value={description}
+              onChange={(e) => setDescription(e.target.value)} />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="rating"
+              label="Rating"
+              type="number"
+              fullWidth
+              value={rating}
+              onChange={(e) => setRating(parseInt(e.target.value))}
+            />
+            <Select
+              labelId="category"
+              id="category"
+              value={category}
+              label="Category"
+              onChange={(e) => setCategory(e.target.value)}
+            >
+             {categories.map((category) => (
+                
+                <MenuItem value={category}>{category}</MenuItem>
+              ))}
+            </Select>
 
-                      }}
+            <DialogActions>
+              <Button onClick={handleCloseDialog}>Cancel</Button>
 
-
-                    >
-                      Delete
-                    </Button>
-                    <Button
-
-                      variant="contained"
-                      color="secondary"
-                      size="small"
-                      style={{ marginLeft: 16 }}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleOpenDialog();
-                        // onModify(
-                        //   params.row.id,
-                        //   params.row.description,
-                        //   params.row.rating,
-                        //   params.row.category
-                        // );
-                      }}
-
-                    >
-                      Edit
-                    </Button>
-                  </strong>
-                ),
-
-              }
-            ]}
-            checkboxSelection
-            density="comfortable" />
-        </div>
-        <Dialog open={dialogOpen} onClose={handleCloseDialog}>
-          <DialogTitle>Modify Mood</DialogTitle>
-          <DialogContent>
-            <form onSubmit={handleSubmit}>
-              <TextField
-                autoFocus
-                margin="dense"
-                id="description"
-                label="Description"
-                type="text"
-                fullWidth
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-              <TextField
-                autoFocus
-                margin="dense"
-                id="rating"
-                label="Rating"
-                type="number"
-                fullWidth
-                value={rating}
-                onChange={(e) => setRating(e.target.value)}
-              />
-              <Select
-                labelId="category"
-                id="category"
-                value={category}
-                label="Category"
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                {categories.map((category, index) => (
-                  <MenuItem key={index} value={category}>
-                    {category}
-                  </MenuItem>
-                ))}
-              </Select>
-
-              <DialogActions>
-                <Button onClick={handleCloseDialog}>Cancel</Button>
-
-                <Button type="submit">Save</Button>
-              </DialogActions>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </Grid>
+              <Button type="submit">Save</Button>
+            </DialogActions>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
+
   );
 }

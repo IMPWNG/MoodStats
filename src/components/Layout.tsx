@@ -113,14 +113,19 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </nav>
       </header>
-      <main>
+      {/* //create the main content with a height of 100% */}
+      <main className="flex flex-col items-center justify-center min-h-screen">
+
+     
         <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col items-center justify-center  bg-white border-2 border-gray-300 rounded-md shadow-md sm:px-6 sm:pt-12 sm:pb-16 sm:shadow-lg">
-            <div id="content">{children}</div>
+          <div className="flex flex-col items-center justify-center">
+            <div id="content" className="flex flex-col items-center justify-center">
+              {children}
+            </div>
           </div>
         </div>
       </main>
-      <footer className="bg-gray-100 border-t border-gray-300">
+      {/* <footer className="bg-gradient-to-r from-pink-400 via-red-500 to-yellow-500 border-t border-gray-300">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div>
             <p className="text-sm text-gray-600">
@@ -138,7 +143,7 @@ export default function Layout({ children }: LayoutProps) {
             </p>
           </div>
         </div>
-      </footer>
+      </footer> */}
     </>
   );
 }
